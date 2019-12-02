@@ -1,5 +1,33 @@
+/* GLOBAL */
 body {
     font-family: 'Courier New', Courier, monospace;
     background: #000;
     color: #fff;
+}
+
+/* MAP */
+
+.geocountry {
+    fill: #222;
+    stroke: #777;
+}
+
+.geocountry:hover {
+    fill: #333;
+    stroke: #777;
+}
+
+.geovisited {
+    fill: #030;
+    stroke: #060;
+}
+
+.geovisited:hover {
+    fill: #090;
+    stroke: #0c0;
+}
+
+.geovisited:active {
+    fill: #0c0;
+    stroke: #0f0;
 }

@@ -35,30 +35,6 @@
           background: #111;
       }
 
-      .geocountry {
-        fill: #222;
-        stroke: #777;
-      }
-
-      .geocountry:hover {
-        fill: #333;
-        stroke: #777;
-      }
-
-      .geovisited {
-        fill: #030;
-        stroke: #060;
-      }
-
-      .geovisited:hover {
-        fill: #090;
-        stroke: #0c0;
-      }
-
-      .geovisited:active {
-        fill: #0c0;
-        stroke: #0f0;
-      }
   </style>
 </head>
 <body>
@@ -82,10 +58,6 @@
         var topoWorld = null;
         var worldFeature = null;
         
-        // call event handlers
-        var dragCall = null;
-        var zoomCall = null;
-
         // load and render globe
         async function loadWorld() {
             // load required topo json data
@@ -158,7 +130,8 @@
             .attr("width", width)
             .attr("height", height);
 
-        dragCall = d3.drag()
+        // setup drag events
+        var dragCall = d3.drag()
             .on("start", () => dragWorld(true))
             .on("drag", () => dragWorld(false))
             .on("end", function () {
@@ -166,7 +139,8 @@
             });
         svgWorld.call(dragCall);
 
-        zoomCall = d3.zoom()
+        // setup zoom events
+        var zoomCall = d3.zoom()
             //.duration(1000)
             //.wheelDelta(() => (-0.1 * d3.event.deltaY))
             .on("zoom", () => zoomWorld());
