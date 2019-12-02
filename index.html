@@ -11,9 +11,26 @@
   <script src="/scripts/lib/d3.v5.js"></script>
   <script src="/scripts/lib/topojson.v3.js"></script>
   <style>
+      #root {
+          width: 90%;
+          margin: 0 auto;
+      }
+
+      #space {
+          position: relative;
+          width: 100%;
+      }
+
+      #space:after {
+          content: "";
+          display: block;
+          padding-bottom: 100%;
+      }
+
       #earth {
-          width: 1024px;
-          height: 1024px;
+          position: absolute;
+          width: 100%;
+          height: 100%;
           background: #111;
       }
 
@@ -22,25 +39,81 @@
         stroke: #777;
       }
 
+      .geocountry:hover {
+        fill: #333;
+        stroke: #777;
+      }
+
       .geovisited {
         fill: #030;
         stroke: #060;
       }
+
+      .geovisited:hover {
+        fill: #090;
+        stroke: #0c0;
+      }
   </style>
 </head>
 <body>
-    <h1>3D Earth D3 Demo</h1>
-    <div id="earth">
+    <h1 id="title">3D Earth D3 Demo</h1>
+    <div id="root">
+        <div id="space">
+            <div id="earth">
+            </div>
+        </div>
     </div>
 
     <script>
-        var dragCall = null;
-        var topoWorld = null;
+        // reference data
+        var visitedCountires = [858, 392, 124, 10, 32, 76, 152, 36, 40, 56, 156, 250, 276, 344, 356, 372, 380, 388, 484, 496, 528, 554, 643, 702, 724, 826, 840];
+
+        // main render output
+        var divWorld = null;
         var svgWorld = null;
 
+        // topo data cache
+        var topoWorld = null;
+        
+        // call event handlers
+        var dragCall = null;
+        var zoomCall = null;
+
+        // load and render globe
         async function loadWorld() {
             // load required topo json data
             topoWorld = await d3.json("/data/topo/110m.json");
+
+            // render countries on globe
+            var features = topojson.feature(topoWorld, topoWorld.objects.countries).features;
+            svgWorld.selectAll(".geocountry")
+                .data(features)
+                .enter()
+                .insert("path")
+                .attr("d", pathEarth)
+                .attr("id", (d) => "g" + d.id)
+                .attr("class", (d) => styleCountry(d))
+                .on("mouseover", (d) => hoverCountry(d))
+        }
+
+        function styleCountry(d) {
+            return "geocountry" + (visitedCountires.includes(parseInt(d.id)) ? " geovisited" : "");
+        }
+
+        function hoverCountry(d) {
+            //document.getElementById("title").innerHTML = "Country #" + d.id;
+        }
+
+        function renderWorld() {
+            svgWorld.selectAll(".geocountry").attr("d", pathEarth);
+        }
+
+        // init d3
+        var space = document.getElementById("space");
+        var width = space.offsetWidth;
+        var height = space.offsetHeight;
+        var minSize = (height < width ? height : width);
+        var scale = (minSize / 2);
 
             // root SVG to render all paths
             svgWorld = d3.select("#earth")
@@ -54,52 +127,13 @@
                 .on("end", function () {
                     console.log("drag end");
                 });
-                svgWorld.call(dragCall);
+            svgWorld.call(dragCall);
 
-            // render countries on globe
-            var features = topojson.feature(topoWorld, topoWorld.objects.countries).features;
-            svgWorld.selectAll(".geocountry")
-                .data(features)
-                .enter()
-                .insert("path")
-                .attr("d", pathEarth)
-                .attr("id", (d) => "g" + d.id)
-                .attr("class", (d) => styleCountry(d))
-                .on("mouseover", (d) => console.log(d.id))
-                //.each((d) => console.log(d3.select(this)));
-                //.each(function (d) { console.log(d3.select(this)).attr("class", "geocountry geovisited"); });
-                //.each((d) => d.classed("geovisited", d.id == "012"));
-
-                /*
-            svgWorld.append("path")
-                .datum(topojson.feature(topoWorld, topoWorld.objects.countries))
-                .attr("class", "geocountry")
-                .attr("d", pathEarth);
-            */
-            // set visited countries
-            /*
-            var z = svgWorld.selectAll(".geocountry");
-            console.log(z);
-            z.forEach(function (x, y) {
-                console.log(x);
-            });
-            */
-        }
-
-        function styleCountry(d) {
-            return "geocountry" + (d.id == "012" ? " geovisited" : "");            
-        }
-
-        function renderWorld() {
-            // render countries on globe
-            svgWorld.selectAll(".geocountry")
-                .attr("d", pathEarth);
-        }
-
-        // init d3
-        var scale = 400;
-        var width = 1024;
-        var height = 1024;
+            zoomCall = d3.zoom()
+                .duration(1000)
+                .wheelDelta(() => (-0.1 * d3.event.deltaY))
+                .on("zoom", () => zoomWorld());
+            svgWorld.call(zoomCall);
 
         // projection used for globe
         var projEarth = d3.geoOrthographic()
@@ -119,10 +153,17 @@
         // load topojson data for world
         loadWorld();
 
+        function calcDistance(a, b) {
+            var x = Math.abs(a[0] - b[0]);
+            var y = Math.abs(a[1] - b[1]);
+            return Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
+        }
 
         // configure drag globe
         var dragMouse = [0, 0];
         var dragPoint = [0, 0];
+        var dragZoom = false;
+        var dragDist = 0;
         function dragWorld(start) {
             // Adapted from http://mbostock.github.io/d3/talk/20111018/azimuthal.html and updated for d3 v3
             // need to add this one to make flat world map pan/zoom http://bl.ocks.org/patricksurry/6621971
@@ -135,11 +176,27 @@
 
             if (start) {
                 console.log("drag start");
-                //_mapD3.clickStart(true);
+                dragDist = 0;
+                dragZoom = false;
                 dragMouse = mouse;
                 dragPoint = projEarth.rotate();
-
-            } else {
+            } 
+            
+            // prevent multi-touch
+            if (dragZoom || d3.event.identifier > 0) {
+                dragZoom = true;
+                var mouse2 = [d3.event.sourceEvent.changedTouches[1].pageX, d3.event.sourceEvent.changedTouches[1].pageY];
+                var dist = calcDistance(mouse, mouse2);
+                if (dragDist == 0) {
+                    dragDist = dist;
+                }
+                var toScale = (dist - dragDist) / width;
+                document.getElementById("title").innerHTML = toScale;
+                var transform = d3.zoomTransform(svgWorld);
+                transform.k = 1 + toScale;
+            svgWorld.attr("transform", transform);
+            }
+            else {
                 console.log("drag");
                 var x = mouse[0] - dragMouse[0];
                 var y = mouse[1] - dragMouse[1];
@@ -147,6 +204,15 @@
                 projEarth.rotate([point[0], point[1]]);
                 renderWorld();
             }
+        }
+
+        function zoomWorld() {
+            //var toS = scale * d3.event.transform.k;
+            var transform = d3.zoomTransform(svgWorld);
+            transform.k = d3.event.transform.k;
+            svgWorld.attr("transform", transform);
+            //console.log(transform);
+            //console.log("zoom", d3.event.transform.k, toS);
         }
     </script>
 </body>
