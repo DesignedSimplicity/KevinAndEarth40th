@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>3D Earth D3 Demo</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <link href="/styles/demo.css" rel="stylesheet">
+  <script src="/scripts/lib/d3-geo-projection.v2.js"></script>
+  <script src="/scripts/lib/d3-zoom.v1.js"></script>
+  <script src="/scripts/lib/d3.v5.js"></script>
+  <script src="/scripts/lib/topojson.v3.js"></script>
+  <style>
+      #earth {
+          width: 1024px;
+          height: 1024px;
+          background: #111;
+      }
+
+      .geocountry {
+        fill: #222;
+        stroke: #777;
+      }
+  </style>
+</head>
+<body>
+    <h1>3D Earth D3 Demo</h1>
+    <div id="earth">
+    </div>
+
+    <script>
+        var dragCall = null;
+        var topoWorld = null;
+        var svgWorld = null;
+
+        async function loadWorld() {
+            // load required topo json data
+            topoWorld = await d3.json("/data/topo/world.json");
+            console.log("loadWorld",  topoWorld);
+
+            // root SVG to render all paths
+            svgWorld = d3.select("#earth")
+                .append("svg")
+                .attr("width", width)
+                .attr("height", height);
+
+                dragCall = d3.drag()
+                .on("start", () => dragWorld(true))
+                .on("drag", () => dragWorld(false))
+                .on("end", function () {
+                    console.log("drag end");
+                });
+                svgWorld.call(dragCall);
+
+            // render countries on globe
+            svgWorld.append("path")
+                .datum(topojson.feature(topoWorld, topoWorld.objects.countries))
+                .attr("class", "geocountry")
+                .attr("d", pathEarth);
+        }
+
+        function renderWorld() {
+            // render countries on globe
+            svgWorld.selectAll(".geocountry")
+                .attr("d", pathEarth);
+        }
+
+        // init d3
+        var scale = 400;
+        var width = 1024;
+        var height = 1024;
+
+        // projection used for globe
+        var projEarth = d3.geoOrthographic()
+            .translate([width / 2, height / 2])
+            .clipAngle(90)
+            .scale(scale);
+
+        // render path used for globe
+        var pathEarth = d3.geoPath().projection(projEarth).pointRadius(2);
+
+        // projection used for flights = globe * 1.25 to offset arcs above surface
+        var projFlights = d3.geoOrthographic()
+            .translate([width / 2, height / 2])
+            .clipAngle(90)
+            .scale(scale * 1.25);
+
+        // load topojson data for world
+        loadWorld();
+
+
+        var dragMouse = [0, 0];
+        var dragPoint = [0, 0];
+        function dragWorld(start) {
+            // Adapted from http://mbostock.github.io/d3/talk/20111018/azimuthal.html and updated for d3 v3
+            // need to add this one to make flat world map pan/zoom http://bl.ocks.org/patricksurry/6621971
+            var mouse = [d3.event.sourceEvent.pageX, d3.event.sourceEvent.pageY];
+            var touch = false;
+            if (d3.event.sourceEvent.changedTouches != null && d3.event.sourceEvent.changedTouches.length > 0) {
+                touch = true;
+                mouse = [d3.event.sourceEvent.changedTouches[0].pageX, d3.event.sourceEvent.changedTouches[0].pageY];
+            }
+
+            if (start) {
+                console.log("drag start");
+                //_mapD3.clickStart(true);
+                dragMouse = mouse;
+                dragPoint = projEarth.rotate();
+
+            } else {
+                console.log("drag");
+                var x = mouse[0] - dragMouse[0];
+                var y = mouse[1] - dragMouse[1];
+                var point = [dragPoint[0] + (mouse[0] - dragMouse[0]) / 4, dragPoint[1] + (dragMouse[1] - mouse[1]) / 4];
+                projEarth.rotate([point[0], point[1]]);
+                renderWorld();
+            }
+        }
+    </script>
+</body>
+</html>
