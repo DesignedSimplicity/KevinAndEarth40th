@@ -21,6 +21,11 @@
         fill: #222;
         stroke: #777;
       }
+
+      .geovisited {
+        fill: #030;
+        stroke: #060;
+      }
   </style>
 </head>
 <body>
@@ -35,8 +40,7 @@
 
         async function loadWorld() {
             // load required topo json data
-            topoWorld = await d3.json("/data/topo/world.json");
-            console.log("loadWorld",  topoWorld);
+            topoWorld = await d3.json("/data/topo/110m.json");
 
             // root SVG to render all paths
             svgWorld = d3.select("#earth")
@@ -44,7 +48,7 @@
                 .attr("width", width)
                 .attr("height", height);
 
-                dragCall = d3.drag()
+            dragCall = d3.drag()
                 .on("start", () => dragWorld(true))
                 .on("drag", () => dragWorld(false))
                 .on("end", function () {
@@ -53,10 +57,37 @@
                 svgWorld.call(dragCall);
 
             // render countries on globe
+            var features = topojson.feature(topoWorld, topoWorld.objects.countries).features;
+            svgWorld.selectAll(".geocountry")
+                .data(features)
+                .enter()
+                .insert("path")
+                .attr("d", pathEarth)
+                .attr("id", (d) => "g" + d.id)
+                .attr("class", (d) => styleCountry(d))
+                .on("mouseover", (d) => console.log(d.id))
+                //.each((d) => console.log(d3.select(this)));
+                //.each(function (d) { console.log(d3.select(this)).attr("class", "geocountry geovisited"); });
+                //.each((d) => d.classed("geovisited", d.id == "012"));
+
+                /*
             svgWorld.append("path")
                 .datum(topojson.feature(topoWorld, topoWorld.objects.countries))
                 .attr("class", "geocountry")
                 .attr("d", pathEarth);
+            */
+            // set visited countries
+            /*
+            var z = svgWorld.selectAll(".geocountry");
+            console.log(z);
+            z.forEach(function (x, y) {
+                console.log(x);
+            });
+            */
+        }
+
+        function styleCountry(d) {
+            return "geocountry" + (d.id == "012" ? " geovisited" : "");            
         }
 
         function renderWorld() {
@@ -89,6 +120,7 @@
         loadWorld();
 
 
+        // configure drag globe
         var dragMouse = [0, 0];
         var dragPoint = [0, 0];
         function dragWorld(start) {
