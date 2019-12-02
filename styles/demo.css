@@ -27,7 +27,7 @@ body {
     stroke: #0c0;
 }
 
-.geovisited:active {
+.geovisited.selected {
     fill: #0c0;
     stroke: #0f0;
 }

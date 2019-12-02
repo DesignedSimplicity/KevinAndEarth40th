@@ -1,86 +1,96 @@
 class Globe {
-    divWorld = null; // main html element    
-    svgWorld = null; // root svg image
-    
-    topoWorld = null; // topo data cache
-    worldFeature = null; // topo feature cache
-
-    pathEarth = null; // path to render SVG
-    projEarth = null; // projection to modify path
-
     visitedCountires = [858, 392, 124, 10, 32, 76, 152, 36, 40, 56, 156, 250, 276, 344, 356, 372, 380, 388, 484, 496, 528, 554, 643, 702, 724, 826, 840];
 
-    space = null;
+    // container
+    divID = "earth";
     width = null;
     height = null;
+    
+    // SVG image
+    svgGlobe = null;
     scale = null;
+    
+    topo = null; // topo data cache
+    countries = null; // topo feature cache
+
+    path = null; // path to render svgGlobe
+    proj = null; // projection to modify path
+
+    zoomable = false;
+    dragable = true;
+    selectedCountryID = 0;
 
     constructor() {
     }
     
-    async loadWorld() {
+    async load() {
         // load required topo json data
-        this.topoWorld = await d3.json("/data/topo/world.json");
+        this.topo = await d3.json("/data/topo/world.json");
 
         // render countries on globe
-        this.worldFeature = topojson.feature(this.topoWorld, this.topoWorld.objects.countries);
-        this.svgWorld.on("click", (d) => this.clickCountry(d));
-        this.svgWorld.selectAll(".geocountry")
-            .data(this.worldFeature.features)
+        this.countries = topojson.feature(this.topo, this.topo.objects.countries);
+        this.svgGlobe.on("click", (d) => this.clickCountry(d));
+        this.svgGlobe.selectAll(".geocountry")
+            .data(this.countries.features)
             .enter()
             .insert("path")
-            .attr("d", this.pathEarth)
-            .attr("id", (d) => "g" + d.id)
+            .attr("d", this.path)
+            .attr("id", (d) => "geocountry" + d.id)
             .attr("class", (d) => this.styleCountry(d))
             .on("mouseover", (d) => this.hoverCountry(d))
             .on("click", (d) => this.clickCountry(d));
     }
 
-    initGlobe() {
+    init() {
         // init d3
-        this.space = document.getElementById("space");
-        this.width = this.space.offsetWidth;
-        this.height = this.space.offsetHeight;
+        var div = document.getElementById(this.divID);
+        this.width = div.offsetWidth;
+        this.height = div.offsetHeight;
         var minSize = (this.height < this.width ? this.height : this.width);
         this.scale = (minSize / 2);
 
-        // root SVG to render all paths
-        this.svgWorld = d3.select("#earth")
+        // root svgGlobe to render all paths
+        this.svgGlobe = d3.select("#" + this.divID)
             .append("svg")
             .attr("width", this.width)
             .attr("height", this.height);
 
         // setup drag events
-        var dragCall = d3.drag()
-            .on("start", () => this.dragWorld(true))
-            .on("drag", () => this.dragWorld(false))
-            //.on("end", function () {});
-        this.svgWorld.call(dragCall);
+        if (this.dragable)
+        {
+            var dragCall = d3.drag()
+                .on("start", () => this.dragWorld(true))
+                .on("drag", () => this.dragWorld(false))
+                //.on("end", function () {});
+            this.svgGlobe.call(dragCall);
+        }
 
         // setup zoom events
-        var zoomCall = d3.zoom()
-            //.duration(1000)
-            //.wheelDelta(() => (-0.1 * d3.event.deltaY))
-            .on("zoom", () => this.zoomWorld());
-        this.svgWorld.call(zoomCall)
-            .on("wheel.zoom", null) // disable wheel zoom
-            .on("dblclick.zoom", null); // disable double click
+        if (this.zoomable) {
+            var zoomCall = d3.zoom()
+                //.duration(1000)
+                //.wheelDelta(() => (-0.1 * d3.event.deltaY))
+                .on("zoom", () => this.zoomTo(d3.event.transform.k));
+            this.svgGlobe.call(zoomCall)
+                .on("wheel.zoom", null) // disable wheel zoom
+                .on("dblclick.zoom", null); // disable double click
+        }
 
         // projection used for globe
-        this.projEarth = d3.geoOrthographic()
+        this.proj = d3.geoOrthographic()
             .translate([this.width / 2, this.height / 2])
             .clipAngle(90)
             .scale(this.scale);
 
         // render path used for globe
-        this.pathEarth = d3.geoPath().projection(this.projEarth); //.pointRadius(2);
+        this.path = d3.geoPath().projection(this.proj); //.pointRadius(2);
 
         // projection used for flights = globe * 1.25 to offset arcs above surface
         /*
         var projFlights = d3.geoOrthographic()
-            .translate([width / 2, height / 2])
+            .translate([this.width / 2, this.height / 2])
             .clipAngle(90)
-            .scale(scale * 1.25);
+            .scale(this.scale * 1.25);
         */
     }
 
@@ -95,29 +105,26 @@ class Globe {
 
         if (start) {
             this.dragMouse = mouse;
-            this.dragPoint = this.projEarth.rotate();
+            this.dragPoint = this.proj.rotate();
         }
         else {
             var x = mouse[0] - this.dragMouse[0];
             var y = mouse[1] - this.dragMouse[1];
             var point = [this.dragPoint[0] + (mouse[0] - this.dragMouse[0]) / 4, this.dragPoint[1] + (this.dragMouse[1] - mouse[1]) / 4];
-            this.projEarth.rotate([point[0], point[1]]);
+            this.proj.rotate([point[0], point[1]]);
             this.renderWorld();
         }
     }
 
-    zoomWorld() {
-        transform(d3.event.transform.k);
+    // zoom to scale
+    zoomTo(scale) {
+        var transform = d3.zoomTransform(this.svgGlobe);
+        transform.k = scale;
+        this.svgGlobe.attr("transform", transform);
     }
 
-    zoomTo(level) {
-        var transform = d3.zoomTransform(this.svgWorld);
-        transform.k = level;
-        this.svgWorld.attr("transform", transform);
-    }
-
-
-
+    // ============================================================
+    // country selection methods
     styleCountry(d) {
         return "geocountry" + (this.visitedCountires.includes(parseInt(d.id)) ? " geovisited" : "");
     }
@@ -126,35 +133,48 @@ class Globe {
         //document.getElementById("title").innerHTML = "Country #" + d.id;
     }
 
-    activeCountry = 0;
     clickCountry(d) {
         // prevent default click handler
-        d3.event.stopPropagation();
+        if (d3.event) {
+            d3.event.stopPropagation();
+        }        
         if (d) {
-            // set selection
-            this.activeCountry = d.id;
-            // find x/y center of object
-            var c = this.pathEarth.centroid(d);
-            // map x/y to lat/lon
-            var i = this.projEarth.invert(c);
-            // invert for rotation
-            this.projEarth.rotate([-i[0], -i[1]]);
-            // refresh render            
-            this.renderWorld();
-            // zoom in
-            this.zoomTo(2);
-            // log out
-            console.log(this.activeCountry);
+            this.selectCountry(d.id);
         }
         else {
-            // clear selection
-            this.activeCountry = 0;
+            // clear selection            
+            this.clearCountry();
             // reset zoom level
             this.zoomTo(1);
         }
     }
 
+    clearCountry() {
+        if (this.selectedCountryID > 0) {
+            d3.select("#geocountry" + this.selectedCountryID).classed("selected", false);
+            this.selectedCountryID = 0;
+        }        
+    }
+
+    selectCountry(id) {
+        // set selection
+        if (this.selectedCountryID != id) {
+            this.clearCountry();
+            this.selectedCountryID = id;
+            d3.select("#geocountry" + id).classed("selected", true);
+
+            // load country data
+            var c = geograffiti.getCountry(id);
+            // invert for rotation
+            this.proj.rotate([-c.lng, -c.lat]);
+            // refresh render            
+            this.renderWorld();
+            // zoom in
+            this.zoomTo(2);
+        }
+    }
+
     renderWorld() {
-        this.svgWorld.selectAll(".geocountry").attr("d", this.pathEarth);
+        this.svgGlobe.selectAll(".geocountry").attr("d", this.path);
     }
 }

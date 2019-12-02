@@ -10,6 +10,7 @@
   <script src="/scripts/lib/d3-zoom.v1.js"></script>
   <script src="/scripts/lib/d3.v5.js"></script>
   <script src="/scripts/lib/topojson.v3.js"></script>
+  <script src="/scripts/geograffiti.js"></script>
   <script src="/scripts/globe.js"></script>
   <style>
       #root {
@@ -38,7 +39,7 @@
   </style>
 </head>
 <body>
-    <h1 id="title">3D Earth D3 Demo</h1>
+    <h1 id="title" onclick="javascript:globe.selectCountry(250);">3D Earth D3 Demo</h1>
     <div id="root">
         <div id="space">
             <div id="earth">
@@ -48,8 +49,9 @@
 
     <script>
         var globe = new Globe();
-        globe.initGlobe();
-        globe.loadWorld();
+        globe.init();
+        globe.load();
+        
     </script>
 </body>
 </html>
