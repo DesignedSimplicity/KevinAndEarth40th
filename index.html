@@ -89,7 +89,7 @@
         // load and render globe
         async function loadWorld() {
             // load required topo json data
-            topoWorld = await d3.json("/data/topo/110m.json");
+            topoWorld = await d3.json("/data/topo/world.json");
 
             // render countries on globe
             worldFeature = topojson.feature(topoWorld, topoWorld.objects.countries);
@@ -115,28 +115,29 @@
 
         var activeCountry = 0;
         function clickCountry(d) {
-            console.log("click", d);
+            // prevent default click handler
+            d3.event.stopPropagation();
             if (d) {
+                // set selection
+                activeCountry = d.id;
                 // find x/y center of object
                 var c = pathEarth.centroid(d);
                 // map x/y to lat/lon
                 var i = projEarth.invert(c);
                 // invert for rotation
                 projEarth.rotate([-i[0], -i[1]]);
-                // change the size
-                projEarth.fitSize([width, height], d);
                 // refresh render            
                 renderWorld();
-
-                // prevent default click handler
-                d3.event.stopPropagation();
+                // zoom in
+                zoomTo(2);
+                // log out
+                console.log(activeCountry);
             }
             else {
-                // change the size
-                projEarth.fitSize([width, height], worldFeature);
-
-                // refresh render            
-                renderWorld();
+                // clear selection
+                activeCountry = 0;
+                // reset zoom level
+                zoomTo(1);
             }
         }
 
@@ -214,8 +215,12 @@
         }
 
         function zoomWorld() {
+            transform(d3.event.transform.k);
+        }
+
+        function zoomTo(level) {
             var transform = d3.zoomTransform(svgWorld);
-            transform.k = d3.event.transform.k;
+            transform.k = level;
             svgWorld.attr("transform", transform);
         }
     </script>
