@@ -63,8 +63,8 @@ class GeoGlobe {
         if (this.dragable)
         {
             var dragCall = d3.drag()
-                .on("start", () => this.dragWorld(true))
-                .on("drag", () => this.dragWorld(false))
+                .on("start", () => this.dragGlobe(true))
+                .on("drag", () => this.dragGlobe(false))
                 //.on("end", function () {});
             this.svgGlobe.call(dragCall);
         }
@@ -98,14 +98,14 @@ class GeoGlobe {
         */
     }
 
-    renderWorld() {
+    render() {
         this.svgGlobe.selectAll(".geocountry").attr("d", this.path);
     }
 
     // drag globe
     dragMouse = [0, 0];
     dragPoint = [0, 0];
-    dragWorld(start) {
+    dragGlobe(start) {
         var mouse = [d3.event.sourceEvent.pageX, d3.event.sourceEvent.pageY];
         if (d3.event.sourceEvent.changedTouches != null && d3.event.sourceEvent.changedTouches.length > 0) {
             mouse = [d3.event.sourceEvent.changedTouches[0].pageX, d3.event.sourceEvent.changedTouches[0].pageY];
@@ -120,7 +120,7 @@ class GeoGlobe {
             var y = mouse[1] - this.dragMouse[1];
             var point = [this.dragPoint[0] + (mouse[0] - this.dragMouse[0]) / 4, this.dragPoint[1] + (this.dragMouse[1] - mouse[1]) / 4];
             this.proj.rotate([point[0], point[1]]);
-            this.renderWorld();
+            this.render();
         }
     }
 
@@ -129,6 +129,32 @@ class GeoGlobe {
         var transform = d3.zoomTransform(this.svgGlobe);
         transform.k = scale;
         this.svgGlobe.attr("transform", transform);
+    }
+
+    // ============================================================
+    // animation translation methods
+    animate(r, k) { // scale, rotate
+        var iT = d3.zoomTransform(this.svgGlobe);
+        if (r != this.proj.rotate() || k != iT.k)
+        {
+            d3.transition()
+                .duration(750)
+                .tween("animate", 
+                    () => {
+                        var iK = d3.interpolate(iT.k, k);
+                        var iR = d3.interpolate(this.proj.rotate(), r);
+                        return (i) => {
+                            iT.k = iK(i);
+                            this.refresh(iT, iR(i));
+                        };
+                    });
+        }
+    }
+
+    refresh(t, r) {
+        this.svgGlobe.attr("transform", t);
+        this.proj.rotate(r);
+        this.render();
     }
 
     // ============================================================
@@ -152,10 +178,10 @@ class GeoGlobe {
         else {
             // clear selection            
             this.clearCountry();
+            // execute event handler
+            this.onSelectCountry();
             // reset zoom level
-            this.zoomTo(1);
-             // execute event handler
-             this.onSelectCountry();
+            this.animate(this.proj.rotate(), 1);
         }
     }
 
@@ -175,12 +201,15 @@ class GeoGlobe {
 
             // load country data
             var c = geograffiti.getCountry(id);
+            this.animate([-c.lng, -c.lat], 2);
+            /*
             // invert for rotation
             this.proj.rotate([-c.lng, -c.lat]);
-            // refresh render            
-            this.renderWorld();
+            // render render            
+            this.render();
             // zoom in
             this.zoomTo(2);
+            */
 
             // execute event handler
             this.onSelectCountry(c);
