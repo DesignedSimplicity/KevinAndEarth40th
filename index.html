@@ -53,6 +53,11 @@
         fill: #090;
         stroke: #0c0;
       }
+
+      .geovisited:active {
+        fill: #0c0;
+        stroke: #0f0;
+      }
   </style>
 </head>
 <body>
@@ -94,6 +99,7 @@
                 .attr("id", (d) => "g" + d.id)
                 .attr("class", (d) => styleCountry(d))
                 .on("mouseover", (d) => hoverCountry(d))
+                .on("click", (d) => clickCountry(d));
         }
 
         function styleCountry(d) {
@@ -102,6 +108,21 @@
 
         function hoverCountry(d) {
             //document.getElementById("title").innerHTML = "Country #" + d.id;
+        }
+
+        var activeCountry = 0;
+        function clickCountry(d) {
+            //var c = projEarth.
+            var b = pathEarth.bounds(d);
+            var bw = b[0][0] - b[1][0];
+            var bh = b[0][1] - b[1][1];
+            if (bw < 0) bw = -bw;
+            if (bh < 0) bh = -bh;
+            var mw = width / bw;
+            var mh = height / bh;
+            var z = (mw < mh ? mw : mh);            
+            console.log(bw, bh, z);
+            //zoomToScale(bw, bh, z);
         }
 
         function renderWorld() {
@@ -115,25 +136,28 @@
         var minSize = (height < width ? height : width);
         var scale = (minSize / 2);
 
-            // root SVG to render all paths
-            svgWorld = d3.select("#earth")
-                .append("svg")
-                .attr("width", width)
-                .attr("height", height);
+        // root SVG to render all paths
+        svgWorld = d3.select("#earth")
+            .append("svg")
+            .attr("width", width)
+            .attr("height", height);
 
-            dragCall = d3.drag()
-                .on("start", () => dragWorld(true))
-                .on("drag", () => dragWorld(false))
-                .on("end", function () {
-                    console.log("drag end");
-                });
-            svgWorld.call(dragCall);
+        dragCall = d3.drag()
+            .on("start", () => dragWorld(true))
+            .on("drag", () => dragWorld(false))
+            /*
+            .on("end", function () {
+                console.log("drag end");
+            })*/;
+        svgWorld.call(dragCall);
 
-            zoomCall = d3.zoom()
-                .duration(1000)
-                .wheelDelta(() => (-0.1 * d3.event.deltaY))
-                .on("zoom", () => zoomWorld());
-            svgWorld.call(zoomCall);
+        zoomCall = d3.zoom()
+            .duration(1000)
+            .wheelDelta(() => (-0.1 * d3.event.deltaY))
+            .on("zoom", () => zoomWorld());
+        svgWorld.call(zoomCall)
+            .on("wheel.zoom", null) // disable wheel zoom
+            .on("dblclick.zoom", null); // disable double click
 
         // projection used for globe
         var projEarth = d3.geoOrthographic()
@@ -142,7 +166,7 @@
             .scale(scale);
 
         // render path used for globe
-        var pathEarth = d3.geoPath().projection(projEarth).pointRadius(2);
+        var pathEarth = d3.geoPath().projection(projEarth); //.pointRadius(2);
 
         // projection used for flights = globe * 1.25 to offset arcs above surface
         var projFlights = d3.geoOrthographic()
@@ -153,51 +177,20 @@
         // load topojson data for world
         loadWorld();
 
-        function calcDistance(a, b) {
-            var x = Math.abs(a[0] - b[0]);
-            var y = Math.abs(a[1] - b[1]);
-            return Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
-        }
-
         // configure drag globe
         var dragMouse = [0, 0];
         var dragPoint = [0, 0];
-        var dragZoom = false;
-        var dragDist = 0;
         function dragWorld(start) {
-            // Adapted from http://mbostock.github.io/d3/talk/20111018/azimuthal.html and updated for d3 v3
-            // need to add this one to make flat world map pan/zoom http://bl.ocks.org/patricksurry/6621971
             var mouse = [d3.event.sourceEvent.pageX, d3.event.sourceEvent.pageY];
-            var touch = false;
             if (d3.event.sourceEvent.changedTouches != null && d3.event.sourceEvent.changedTouches.length > 0) {
-                touch = true;
                 mouse = [d3.event.sourceEvent.changedTouches[0].pageX, d3.event.sourceEvent.changedTouches[0].pageY];
             }
 
             if (start) {
-                console.log("drag start");
-                dragDist = 0;
-                dragZoom = false;
                 dragMouse = mouse;
                 dragPoint = projEarth.rotate();
-            } 
-            
-            // prevent multi-touch
-            if (dragZoom || d3.event.identifier > 0) {
-                dragZoom = true;
-                var mouse2 = [d3.event.sourceEvent.changedTouches[1].pageX, d3.event.sourceEvent.changedTouches[1].pageY];
-                var dist = calcDistance(mouse, mouse2);
-                if (dragDist == 0) {
-                    dragDist = dist;
-                }
-                var toScale = (dist - dragDist) / width;
-                document.getElementById("title").innerHTML = toScale;
-                var transform = d3.zoomTransform(svgWorld);
-                transform.k = 1 + toScale;
-            svgWorld.attr("transform", transform);
             }
             else {
-                console.log("drag");
                 var x = mouse[0] - dragMouse[0];
                 var y = mouse[1] - dragMouse[1];
                 var point = [dragPoint[0] + (mouse[0] - dragMouse[0]) / 4, dragPoint[1] + (dragMouse[1] - mouse[1]) / 4];
@@ -213,6 +206,13 @@
             svgWorld.attr("transform", transform);
             //console.log(transform);
             //console.log("zoom", d3.event.transform.k, toS);
+        }
+
+        function zoomToScale(cx, cy, scale) {
+            //var toS = scale * d3.event.transform.k;
+            var transform = d3.zoomTransform(svgWorld);
+            transform.k = scale;
+            svgWorld.attr("transform", transform);
         }
     </script>
 </body>
