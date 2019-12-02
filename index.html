@@ -28,6 +28,7 @@
       }
 
       #earth {
+          overflow: hidden;
           position: absolute;
           width: 100%;
           height: 100%;
@@ -79,6 +80,7 @@
 
         // topo data cache
         var topoWorld = null;
+        var worldFeature = null;
         
         // call event handlers
         var dragCall = null;
@@ -90,9 +92,10 @@
             topoWorld = await d3.json("/data/topo/110m.json");
 
             // render countries on globe
-            var features = topojson.feature(topoWorld, topoWorld.objects.countries).features;
+            worldFeature = topojson.feature(topoWorld, topoWorld.objects.countries);
+            svgWorld.on("click", (d) => clickCountry(d));
             svgWorld.selectAll(".geocountry")
-                .data(features)
+                .data(worldFeature.features)
                 .enter()
                 .insert("path")
                 .attr("d", pathEarth)
@@ -112,17 +115,29 @@
 
         var activeCountry = 0;
         function clickCountry(d) {
-            //var c = projEarth.
-            var b = pathEarth.bounds(d);
-            var bw = b[0][0] - b[1][0];
-            var bh = b[0][1] - b[1][1];
-            if (bw < 0) bw = -bw;
-            if (bh < 0) bh = -bh;
-            var mw = width / bw;
-            var mh = height / bh;
-            var z = (mw < mh ? mw : mh);            
-            console.log(bw, bh, z);
-            //zoomToScale(bw, bh, z);
+            console.log("click", d);
+            if (d) {
+                // find x/y center of object
+                var c = pathEarth.centroid(d);
+                // map x/y to lat/lon
+                var i = projEarth.invert(c);
+                // invert for rotation
+                projEarth.rotate([-i[0], -i[1]]);
+                // change the size
+                projEarth.fitSize([width, height], d);
+                // refresh render            
+                renderWorld();
+
+                // prevent default click handler
+                d3.event.stopPropagation();
+            }
+            else {
+                // change the size
+                projEarth.fitSize([width, height], worldFeature);
+
+                // refresh render            
+                renderWorld();
+            }
         }
 
         function renderWorld() {
@@ -145,15 +160,14 @@
         dragCall = d3.drag()
             .on("start", () => dragWorld(true))
             .on("drag", () => dragWorld(false))
-            /*
             .on("end", function () {
-                console.log("drag end");
-            })*/;
+                //console.log(projEarth.rotate());
+            });
         svgWorld.call(dragCall);
 
         zoomCall = d3.zoom()
-            .duration(1000)
-            .wheelDelta(() => (-0.1 * d3.event.deltaY))
+            //.duration(1000)
+            //.wheelDelta(() => (-0.1 * d3.event.deltaY))
             .on("zoom", () => zoomWorld());
         svgWorld.call(zoomCall)
             .on("wheel.zoom", null) // disable wheel zoom
@@ -200,18 +214,8 @@
         }
 
         function zoomWorld() {
-            //var toS = scale * d3.event.transform.k;
             var transform = d3.zoomTransform(svgWorld);
             transform.k = d3.event.transform.k;
-            svgWorld.attr("transform", transform);
-            //console.log(transform);
-            //console.log("zoom", d3.event.transform.k, toS);
-        }
-
-        function zoomToScale(cx, cy, scale) {
-            //var toS = scale * d3.event.transform.k;
-            var transform = d3.zoomTransform(svgWorld);
-            transform.k = scale;
             svgWorld.attr("transform", transform);
         }
     </script>
