@@ -11,7 +11,7 @@
   <script src="/scripts/lib/d3.v5.js"></script>
   <script src="/scripts/lib/topojson.v3.js"></script>
   <script src="/scripts/geograffiti.js"></script>
-  <script src="/scripts/globe.js"></script>
+  <script src="/scripts/geoglobe.js"></script>
   <style>
       #root {
           width: 90%;
@@ -39,7 +39,7 @@
   </style>
 </head>
 <body>
-    <h1 id="title" onclick="javascript:globe.selectCountry(250);">3D Earth D3 Demo</h1>
+    <h1 id="title">3D Earth D3 Demo</h1>
     <div id="root">
         <div id="space">
             <div id="earth">
@@ -48,9 +48,13 @@
     </div>
 
     <script>
-        var globe = new Globe();
+        var globe = new GeoGlobe();
         globe.init();
         globe.load();
+        
+        globe.onSelectCountry = function(country) {
+            document.getElementById("title").innerHTML = (country ? country.name : "Earth");
+        }
         
     </script>
 </body>

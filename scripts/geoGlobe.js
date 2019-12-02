@@ -1,6 +1,4 @@
-class Globe {
-    visitedCountires = [858, 392, 124, 10, 32, 76, 152, 36, 40, 56, 156, 250, 276, 344, 356, 372, 380, 388, 484, 496, 528, 554, 643, 702, 724, 826, 840];
-
+class GeoGlobe {
     // container
     divID = "earth";
     width = null;
@@ -11,13 +9,15 @@ class Globe {
     scale = null;
     
     topo = null; // topo data cache
-    countries = null; // topo feature cache
+    places = null;
 
     path = null; // path to render svgGlobe
     proj = null; // projection to modify path
 
     zoomable = false;
     dragable = true;
+    debug = true;
+
     selectedCountryID = 0;
 
     constructor() {
@@ -26,12 +26,12 @@ class Globe {
     async load() {
         // load required topo json data
         this.topo = await d3.json("/data/topo/world.json");
+        var features = topojson.feature(this.topo, this.topo.objects.countries).features;
 
         // render countries on globe
-        this.countries = topojson.feature(this.topo, this.topo.objects.countries);
         this.svgGlobe.on("click", (d) => this.clickCountry(d));
         this.svgGlobe.selectAll(".geocountry")
-            .data(this.countries.features)
+            .data(features)
             .enter()
             .insert("path")
             .attr("d", this.path)
@@ -39,6 +39,10 @@ class Globe {
             .attr("class", (d) => this.styleCountry(d))
             .on("mouseover", (d) => this.hoverCountry(d))
             .on("click", (d) => this.clickCountry(d));
+
+        // load optional place data
+        this.places = await d3.json("/data/cities.json");
+
     }
 
     init() {
@@ -94,6 +98,10 @@ class Globe {
         */
     }
 
+    renderWorld() {
+        this.svgGlobe.selectAll(".geocountry").attr("d", this.path);
+    }
+
     // drag globe
     dragMouse = [0, 0];
     dragPoint = [0, 0];
@@ -126,11 +134,11 @@ class Globe {
     // ============================================================
     // country selection methods
     styleCountry(d) {
-        return "geocountry" + (this.visitedCountires.includes(parseInt(d.id)) ? " geovisited" : "");
+        return "geocountry" + (geograffiti.isVisitedCountry(parseInt(d.id)) ? " geovisited" : "");
     }
 
     hoverCountry(d) {
-        //document.getElementById("title").innerHTML = "Country #" + d.id;
+        this.onHoverCountry(d ? geograffiti.getCountry(d.id) : null);
     }
 
     clickCountry(d) {
@@ -146,6 +154,8 @@ class Globe {
             this.clearCountry();
             // reset zoom level
             this.zoomTo(1);
+             // execute event handler
+             this.onSelectCountry();
         }
     }
 
@@ -171,10 +181,17 @@ class Globe {
             this.renderWorld();
             // zoom in
             this.zoomTo(2);
+
+            // execute event handler
+            this.onSelectCountry(c);
         }
     }
 
-    renderWorld() {
-        this.svgGlobe.selectAll(".geocountry").attr("d", this.path);
+    onSelectCountry(country) {
+        if (this.debug) console.log("onSelectCountry", country)
+    }
+
+    onHoverCountry(country) {
+        if (this.debug) console.log("onHoverCountry", country);
     }
 }
