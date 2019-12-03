@@ -8,43 +8,22 @@ class GeoGlobe {
     svgGlobe = null;
     scale = null;
     
-    topo = null; // topo data cache
-    places = null;
+    topo = null; // topo data
+    places = null; // place dots
+    flights = null; // flight arcs
 
     path = null; // path to render svgGlobe
     proj = null; // projection to modify path
 
     zoomable = false;
     dragable = true;
-    debug = true;
+    debug = false;
 
     selectedCountryID = 0;
 
     constructor() {
     }
     
-    async load() {
-        // load required topo json data
-        this.topo = await d3.json("/data/topo/world.json");
-        var features = topojson.feature(this.topo, this.topo.objects.countries).features;
-
-        // render countries on globe
-        this.svgGlobe.on("click", (d) => this.clickCountry(d));
-        this.svgGlobe.selectAll(".geocountry")
-            .data(features)
-            .enter()
-            .insert("path")
-            .attr("d", this.path)
-            .attr("id", (d) => "geocountry" + d.id)
-            .attr("class", (d) => this.styleCountry(d))
-            .on("mouseover", (d) => this.hoverCountry(d))
-            .on("click", (d) => this.clickCountry(d));
-
-        // load optional place data
-        this.places = await d3.json("/data/cities.json");
-
-    }
-
     init() {
         // init d3
         var div = document.getElementById(this.divID);
@@ -84,7 +63,8 @@ class GeoGlobe {
         this.proj = d3.geoOrthographic()
             .translate([this.width / 2, this.height / 2])
             .clipAngle(90)
-            .scale(this.scale);
+            .scale(this.scale)
+            .rotate([40, -5]);
 
         // render path used for globe
         this.path = d3.geoPath().projection(this.proj); //.pointRadius(2);
@@ -97,9 +77,92 @@ class GeoGlobe {
             .scale(this.scale * 1.25);
         */
     }
+    
+    // ============================================================
+    async load() {
+        this.loadTopo();
+        this.loadPlaces();
+        this.loadFlights();
+    }
 
+    async loadTopo() {
+        // load required topo json data
+        this.topo = await d3.json("/data/topo/world.json");
+        var features = topojson.feature(this.topo, this.topo.objects.countries).features;
+
+        // render countries on globe
+        this.svgGlobe.on("click", (d) => this.clickCountry(d));
+        this.svgGlobe.selectAll(".geocountry")
+            .data(features)
+            .enter()
+            .insert("path")
+            .attr("d", this.path)
+            .attr("id", (d) => "geocountry" + d.id)
+            .attr("class", (d) => this.styleCountry(d))
+            .on("mouseover", (d) => this.hoverCountry(d))
+            .on("click", (d) => this.clickCountry(d));
+    }
+
+    async loadPlaces() {
+        // load places data
+        this.places = await d3.json("/data/places.json");
+        this.showPlaces();
+
+        this.proj.rotate([77.1053673, -38.8858006]);
+        this.render();
+    }
+
+    async loadFlights() {
+        // load flight data
+        this.flights = await d3.json("/data/flights.json");
+
+    }
+
+    // ============================================================
+    stylePlace(place) {
+        switch (place.type.toLowerCase()) {
+            case "city":
+                return [1.5, "geocity"];
+            default:
+                return [1, "geopoint"];
+        }
+    }
+
+    showPlaces() {
+        var points = [];
+        var center = this.proj.rotate();
+        //console.log("center", center[0], center[1]);
+        this.places.forEach(place => {
+            //console.log("place", place.lng, place.lat);
+            var dlng = (center[0] + place.lng);
+            var dlat = (center[1] + place.lat);
+            console.log("delta", dlng, dlat);
+            //var distance = geograffiti.calculateDistance(center[0], center[1], place.lng, place.lat);
+            //if (distance <= 10000) {
+            if (true || dlng < 90 && dlat < 90) {
+                var style = this.stylePlace(place);
+                var point = this.proj([place.lng, place.lat]);
+                //console.log(point);
+                points.push({ x: point[0], y: point[1], r: style[0], t: style[1] });
+            }
+        });
+        
+        this.svgGlobe.selectAll("circle").remove();
+        this.svgGlobe.selectAll("circle")
+            .data(points)
+            .enter()
+            .append("circle")
+            .attr("cx", function (d) { return d.x; })
+            .attr("cy", function (d) { return d.y; })
+            .attr("r", function (d) { return d.r; })
+            .attr("class", function (d) { return d.t; });
+    }
+
+    // ============================================================
+    // update svg with data
     render() {
         this.svgGlobe.selectAll(".geocountry").attr("d", this.path);
+        this.showPlaces();
     }
 
     // drag globe
@@ -124,16 +187,15 @@ class GeoGlobe {
         }
     }
 
-    // zoom to scale
+    // zoom to set scale without animation
     zoomTo(scale) {
         var transform = d3.zoomTransform(this.svgGlobe);
         transform.k = scale;
         this.svgGlobe.attr("transform", transform);
     }
 
-    // ============================================================
-    // animation translation methods
-    animate(r, k) { // scale, rotate
+    // rotate and scale animation
+    animate(r, k) { // rotate, scale
         var iT = d3.zoomTransform(this.svgGlobe);
         if (r != this.proj.rotate() || k != iT.k)
         {
@@ -145,16 +207,12 @@ class GeoGlobe {
                         var iR = d3.interpolate(this.proj.rotate(), r);
                         return (i) => {
                             iT.k = iK(i);
-                            this.refresh(iT, iR(i));
+                            this.svgGlobe.attr("transform", iT);
+                            this.proj.rotate(iR(i));
+                            this.render();
                         };
                     });
         }
-    }
-
-    refresh(t, r) {
-        this.svgGlobe.attr("transform", t);
-        this.proj.rotate(r);
-        this.render();
     }
 
     // ============================================================

@@ -1,0 +1,538 @@
+[
+  {
+    "key": "41026946D02A4961B41D5002EF7834C7",
+    "type": "Airport",
+    "country": 32,
+    "name": "Bariloche Airport",
+    "lat": -41.1467142,
+    "lng": -71.1620296
+  },
+  {
+    "key": "D6670D963CD74F6EB717AAA7E990C88A",
+    "type": "Airport",
+    "country": 32,
+    "name": "El Calafate Airport",
+    "lat": -50.283977,
+    "lng": -72.0536406
+  },
+  {
+    "key": "5C585C096309453586E0CF0DFCBE6074",
+    "type": "Airport",
+    "country": 32,
+    "name": "Ezeiza International Airport",
+    "lat": -34.8150044,
+    "lng": -58.5348284
+  },
+  {
+    "key": "52189B93E6C84FB5944BC4FEEE544C1F",
+    "type": "Airport",
+    "country": 32,
+    "name": "Martin Miguel de Guemes International Airport",
+    "lat": -24.8442303,
+    "lng": -65.4784117
+  },
+  {
+    "key": "E7E90BB5991F42C8BD4FAA8B861A859E",
+    "type": "Airport",
+    "country": 32,
+    "name": "Ushuaia Airport",
+    "lat": -54.8396728,
+    "lng": -68.3127488
+  },
+  {
+    "key": "79D7DC00B226437BA16DF373B904C9C5",
+    "type": "Airport",
+    "country": 36,
+    "name": "ADL",
+    "lat": -34.9461557,
+    "lng": 138.5332378
+  },
+  {
+    "key": "E46C43FE31C548059BCE02F2EF98C6C6",
+    "type": "Airport",
+    "country": 36,
+    "name": "CNS",
+    "lat": -16.8777626,
+    "lng": 145.7499352
+  },
+  {
+    "key": "0C0DBAFFA203410E912B4BC982036C8B",
+    "type": "Airport",
+    "country": 36,
+    "name": "HBA",
+    "lat": -42.836354,
+    "lng": 147.5074608
+  },
+  {
+    "key": "8D002AD1AB134ACC835C9671F43B0EE0",
+    "type": "Airport",
+    "country": 36,
+    "name": "PER",
+    "lat": -31.9385476,
+    "lng": 115.9672492
+  },
+  {
+    "key": "E8299E2AB7B74B1CB91B3ECA57582CC7",
+    "type": "Airport",
+    "country": 36,
+    "name": "QLD",
+    "lat": -27.394131,
+    "lng": 153.115339
+  },
+  {
+    "key": "7D820E70B857497A9CA870D79EA5B8A4",
+    "type": "Airport",
+    "country": 36,
+    "name": "SYD",
+    "lat": -33.9399228,
+    "lng": 151.1752764
+  },
+  {
+    "key": "7DD9CD7643DE49B89C1E034F700DCFFB",
+    "type": "Airport",
+    "country": 36,
+    "name": "VIC",
+    "lat": -37.6697377,
+    "lng": 144.8488148
+  },
+  {
+    "key": "E95247BFB8CF47E2B7D96E10245DB5BD",
+    "type": "Airport",
+    "country": 56,
+    "name": "BRU",
+    "lat": 50.900999,
+    "lng": 4.4855744
+  },
+  {
+    "key": "586750D98E1E48E9A39F51C8A19CE826",
+    "type": "Airport",
+    "country": 76,
+    "name": "Foz do Iguacu International Airport",
+    "lat": -25.5977089,
+    "lng": -54.4885132
+  },
+  {
+    "key": "45E2C81ABAEA4024B316F929477EBA1F",
+    "type": "Airport",
+    "country": 76,
+    "name": "Sao Paulo Airport",
+    "lat": -23.6385189,
+    "lng": -46.6720831
+  },
+  {
+    "key": "6E70FC82447F47BF91EE12B5294D818B",
+    "type": "Airport",
+    "country": 152,
+    "name": "Aeropuerto de Santiago",
+    "lat": -33.396738,
+    "lng": -70.7933832
+  },
+  {
+    "key": "73166008F4574057B226DEC806A4EFE9",
+    "type": "Airport",
+    "country": 152,
+    "name": "Airport El Loa Calama",
+    "lat": -22.4954026,
+    "lng": -68.9073692
+  },
+  {
+    "key": "96071E59BC1B4DF081AA5EA04F90E49F",
+    "type": "Airport",
+    "country": 152,
+    "name": "Airport Mataveri",
+    "lat": -27.158723,
+    "lng": -109.4300364
+  },
+  {
+    "key": "2A64A98EF1984F558E6D3340B0D4AF82",
+    "type": "Airport",
+    "country": 152,
+    "name": "Diego Aracena International Airport",
+    "lat": -20.5364084,
+    "lng": -70.1805181
+  },
+  {
+    "key": "C90F3CB0047D40ED8D5DE36422883340",
+    "type": "Airport",
+    "country": 156,
+    "name": "PVG",
+    "lat": 31.1443439,
+    "lng": 121.808273
+  },
+  {
+    "key": "345DF33D7182409DBBFBEF763F2E265D",
+    "type": "Airport",
+    "country": 208,
+    "name": "Copenhagen Airport",
+    "lat": 55.6180236,
+    "lng": 12.6507628
+  },
+  {
+    "key": "2AB688099D1D45B9883E745593148970",
+    "type": "Airport",
+    "country": 276,
+    "name": "Berlin Tegel Airport",
+    "lat": 52.5588327,
+    "lng": 13.2884374
+  },
+  {
+    "key": "D65AFBB1F3E847C688B8D4E9FE91E152",
+    "type": "Airport",
+    "country": 276,
+    "name": "Frankfurt Airport",
+    "lat": 50.0379326,
+    "lng": 8.5621518
+  },
+  {
+    "key": "5D02EFF4B81B4C639F6D247C8248416A",
+    "type": "Airport",
+    "country": 344,
+    "name": "HKG",
+    "lat": 22.308047,
+    "lng": 113.9184808
+  },
+  {
+    "key": "B73B87629FF74E75BF5647506FC24495",
+    "type": "Airport",
+    "country": 352,
+    "name": "RVK",
+    "lat": 64.1318703,
+    "lng": -21.9466063
+  },
+  {
+    "key": "B0373716BD67487CAAC3ECED72EC8C2F",
+    "type": "Airport",
+    "country": 356,
+    "name": "BOM",
+    "lat": 19.0895595,
+    "lng": 72.8656144
+  },
+  {
+    "key": "AA68411772D1435CB2889D517BA948CB",
+    "type": "Airport",
+    "country": 356,
+    "name": "Delhi Airport",
+    "lat": 28.5638921,
+    "lng": 77.1198013
+  },
+  {
+    "key": "31F1BA293853432192ADD09F5B35CA61",
+    "type": "Airport",
+    "country": 380,
+    "name": "CIA",
+    "lat": 41.8000198,
+    "lng": 12.5933595
+  },
+  {
+    "key": "899685C3A3224F75BE82EFB551BA2992",
+    "type": "Airport",
+    "country": 388,
+    "name": "Sangster International Airport",
+    "lat": 18.5022634,
+    "lng": -77.9144344
+  },
+  {
+    "key": "1664FA70E6A44580867E6EBD8A21C3F6",
+    "type": "Airport",
+    "country": 392,
+    "name": "HND",
+    "lat": 35.5493932,
+    "lng": 139.7798386
+  },
+  {
+    "key": "BAF2C8935A824C0D9089C5EF9C7C6317",
+    "type": "Airport",
+    "country": 484,
+    "name": "CUN",
+    "lat": 21.0403409,
+    "lng": -86.873564
+  },
+  {
+    "key": "BF71C22CED09436E9A96A0847428768B",
+    "type": "Airport",
+    "country": 528,
+    "name": "Schiphol",
+    "lat": 52.3076865,
+    "lng": 4.7674241
+  },
+  {
+    "key": "1875868591364B63BE624E28EC13D371",
+    "type": "Airport",
+    "country": 554,
+    "name": "Auckland Airport",
+    "lat": -37.0082476,
+    "lng": 174.7850358
+  },
+  {
+    "key": "FE788CBF7A8A4FF1B81212B5138B90A6",
+    "type": "Airport",
+    "country": 554,
+    "name": "Christchurch Airport",
+    "lat": -43.4880606,
+    "lng": 172.5428217
+  },
+  {
+    "key": "FA7C5473DA1048A6A628DCDE8A77C629",
+    "type": "Airport",
+    "country": 554,
+    "name": "Great Barrier Aerodrome",
+    "lat": -36.2425725,
+    "lng": 175.4677242
+  },
+  {
+    "key": "65754F6811AF41BA9C14D2FAEE247CE2",
+    "type": "Airport",
+    "country": 554,
+    "name": "Invercargill Airport",
+    "lat": -46.4154886,
+    "lng": 168.3221149
+  },
+  {
+    "key": "13F43FB2C8B4415C828386F8339EFCC4",
+    "type": "Airport",
+    "country": 554,
+    "name": "Milford Sound Airport",
+    "lat": -44.6736719,
+    "lng": 167.9241865
+  },
+  {
+    "key": "E5A32039D1FB488AAB58E4621A00C599",
+    "type": "Airport",
+    "country": 554,
+    "name": "Motueka Airport",
+    "lat": -41.1232376,
+    "lng": 172.9938915
+  },
+  {
+    "key": "791A013E8B3B45BC8226C566DFDC64A3",
+    "type": "Airport",
+    "country": 554,
+    "name": "Mount Cook Airport",
+    "lat": -43.7665651,
+    "lng": 170.1344895
+  },
+  {
+    "key": "6D89A2E6875F402EA852AC95C553870E",
+    "type": "Airport",
+    "country": 554,
+    "name": "Nelson Airport",
+    "lat": -41.2971798,
+    "lng": 173.2264012
+  },
+  {
+    "key": "196C0012F11A43F8B2BF0ACF4A899A1E",
+    "type": "Airport",
+    "country": 554,
+    "name": "Omarama Glider Airport",
+    "lat": -44.4840603,
+    "lng": 169.9822126
+  },
+  {
+    "key": "FE181EDCECD54EE3937EBEC3A00F56F4",
+    "type": "Airport",
+    "country": 554,
+    "name": "Queenstown Airport",
+    "lat": -45.0209721,
+    "lng": 168.7399228
+  },
+  {
+    "key": "06EC4D7F8F0547AAB0633AF49F5E7CAE",
+    "type": "Airport",
+    "country": 554,
+    "name": "Ryans Creek Aerodrome",
+    "lat": -46.8997222,
+    "lng": 168.1016667
+  },
+  {
+    "key": "F4603758777940329C6E7B49A7AF6CEF",
+    "type": "Airport",
+    "country": 554,
+    "name": "Taupo Airport",
+    "lat": -38.7398802,
+    "lng": 176.0831365
+  },
+  {
+    "key": "80D0781BAE9D4513AB964741F7855AE8",
+    "type": "Airport",
+    "country": 554,
+    "name": "Wellington Airport",
+    "lat": -41.3275941,
+    "lng": 174.8075984
+  },
+  {
+    "key": "1CCC2C8E07C145F6B3B58FB43393D181",
+    "type": "Airport",
+    "country": 643,
+    "name": "LED",
+    "lat": 59.8029126,
+    "lng": 30.2678391
+  },
+  {
+    "key": "8550C50F414A479B883971A1BEDE39C5",
+    "type": "Airport",
+    "country": 702,
+    "name": "Changi Airport",
+    "lat": 1.3644202,
+    "lng": 103.9915308
+  },
+  {
+    "key": "0D7E39AC63E344DE9A141213E58F46EC",
+    "type": "Airport",
+    "country": 724,
+    "name": "Ibiza Airport",
+    "lat": 38.8748594,
+    "lng": 1.3712232
+  },
+  {
+    "key": "8BD261CD02C64BF1BEB968B7BD6E15B4",
+    "type": "Airport",
+    "country": 826,
+    "name": "LHR",
+    "lat": 51.4700223,
+    "lng": -0.4542955
+  },
+  {
+    "key": "3B68E8368F63486DBF411DAE40B7DFB9",
+    "type": "Airport",
+    "country": 840,
+    "name": "Austin-Bergstrom International Airport",
+    "lat": 30.194085,
+    "lng": -97.6710886
+  },
+  {
+    "key": "88F2B0ACE3FB49E6A49D6C6563D3E35E",
+    "type": "Airport",
+    "country": 840,
+    "name": "BWI",
+    "lat": 39.181729,
+    "lng": -76.6692065
+  },
+  {
+    "key": "40A2321F05D548D8BE70EC28AEEB674D",
+    "type": "Airport",
+    "country": 840,
+    "name": "CLT",
+    "lat": 35.2144026,
+    "lng": -80.9473146
+  },
+  {
+    "key": "AADF01D40D6A4ABAADCC28FD16F8C5EF",
+    "type": "Airport",
+    "country": 840,
+    "name": "DEN",
+    "lat": 39.8487935,
+    "lng": -104.6728573
+  },
+  {
+    "key": "2775EC315654483E82D3A5DDC1074D9C",
+    "type": "Airport",
+    "country": 840,
+    "name": "Hartsfield-Jackson Atlanta International Airport",
+    "lat": 33.6407282,
+    "lng": -84.4277001
+  },
+  {
+    "key": "FF216CCB2A46483A9ABF5A6A7B0711D5",
+    "type": "Airport",
+    "country": 840,
+    "name": "IAD",
+    "lat": 38.9531162,
+    "lng": -77.4565388
+  },
+  {
+    "key": "30015FEA3DDE4B5EB662F74A090E5A72",
+    "type": "Airport",
+    "country": 840,
+    "name": "IND",
+    "lat": 39.7168593,
+    "lng": -86.2955952
+  },
+  {
+    "key": "DB1E6855D01647C39B75EB3087479356",
+    "type": "Airport",
+    "country": 840,
+    "name": "JFK",
+    "lat": 40.6413111,
+    "lng": -73.7781391
+  },
+  {
+    "key": "4C690EA450FF4F07AEAF77C1731F31E8",
+    "type": "Airport",
+    "country": 840,
+    "name": "LAX",
+    "lat": 33.94281,
+    "lng": -118.404709
+  },
+  {
+    "key": "573FB2BDBF464F47B954A1E8A21CF2A5",
+    "type": "Airport",
+    "country": 840,
+    "name": "OAK",
+    "lat": 37.7125689,
+    "lng": -122.2197428
+  },
+  {
+    "key": "45321FA11491490490D7270D462D7E1C",
+    "type": "Airport",
+    "country": 840,
+    "name": "PHL",
+    "lat": 39.8743959,
+    "lng": -75.2424229
+  },
+  {
+    "key": "12E46FF4CFB7443189AD8B9A518E18CF",
+    "type": "Airport",
+    "country": 840,
+    "name": "PHX",
+    "lat": 33.4372686,
+    "lng": -112.0077881
+  },
+  {
+    "key": "6A797C9E5F84436F9AA53D755720F09F",
+    "type": "Airport",
+    "country": 840,
+    "name": "Reno-Tahoe International Airport",
+    "lat": 39.4995907,
+    "lng": -119.7680951
+  },
+  {
+    "key": "1F5952F176804874A8C10DF5EE899BF9",
+    "type": "Airport",
+    "country": 840,
+    "name": "Ronald Reagan Washington National Airport",
+    "lat": 38.851242,
+    "lng": -77.0402315
+  },
+  {
+    "key": "6F8B7A474E1F444596718D90ADB3F6AE",
+    "type": "Airport",
+    "country": 840,
+    "name": "San Diego International Airport",
+    "lat": 32.7338006,
+    "lng": -117.1933038
+  },
+  {
+    "key": "A1DEBB92AFFF4B80A9552D0E80B5DA75",
+    "type": "Airport",
+    "country": 840,
+    "name": "Seattle Airport",
+    "lat": 47.6180565,
+    "lng": -122.3398985
+  },
+  {
+    "key": "45ADAB1DB0F34EA890E1C1125515757E",
+    "type": "Airport",
+    "country": 840,
+    "name": "SLC",
+    "lat": 40.7899404,
+    "lng": -111.9790706
+  },
+  {
+    "key": "7020122DBC2F4C449FB4C611A20B86D3",
+    "type": "Airport",
+    "country": 840,
+    "name": "Ted Stevens Anchorage International Airport",
+    "lat": 61.1758863,
+    "lng": -149.9900792
+  }
+]
