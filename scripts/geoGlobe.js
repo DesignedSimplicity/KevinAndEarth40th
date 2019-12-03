@@ -80,7 +80,7 @@ class GeoGlobe {
         var features = topojson.feature(this.topo, this.topo.objects.countries).features;
 
         // refresh countries on globe
-        this.svgGlobe.on("click", (d) => this.clickCountry(d));
+        this.svgGlobe.on("click", () => this.clickCountry(null));
         this.svgGlobe.selectAll(".geocountry")
             .data(features)
             .enter()
@@ -89,12 +89,14 @@ class GeoGlobe {
             .attr("id", (d) => "geocountry" + d.id)
             .attr("class", (d) => this.styleCountry(d))
             .on("mouseover", (d) => this.hoverCountry(d))
+            .on("mouseout", () => this.hoverCountry(null))
             .on("click", (d) => this.clickCountry(d));
     }
 
     async loadPlaces() {
         // load places data
         this.places = await d3.json("/data/places.json");
+        geodata.setPlaces(this.places);
         this.showPlaces();
     }
 
@@ -198,7 +200,9 @@ class GeoGlobe {
 			.attr("cx", function (d) { return d.x; })
 			.attr("cy", function (d) { return d.y; })
             .attr("r", function (d) { return d.r; })
-            .on("mouseover", (d) => this.hoverPlace(d));
+            .on("mouseover", (d) => this.hoverPlace(d))
+            .on("mouseout", () => this.hoverPlace(null))
+            .on("click", (d) => this.clickPlace(d));
     }
     /*
     showCitiesAsPath() {
@@ -303,22 +307,41 @@ class GeoGlobe {
     hoverPlace(d) {
         if (d && d.id) {
             var key = d.id.replace("geoplace", "");
-            this.onHoverPlace(key);
+            var place = geodata.getPlace(key);
+            this.onHoverPlace(place);
+        }
+        else {
+            this.onHoverPlace(null);
         }
     }
 
-    onHoverPlace(key) {
-        if (this.debug) console.log("onHoverPlace", key);
+    clickPlace(d) {
+        if (d && d.id) {
+            var key = d.id.replace("geoplace", "");
+            var place = geodata.getPlace(key);
+            this.onClickPlace(place);
+        }
+        else {
+            this.onClickPlace(null);
+        }
+    }
+
+    onClickPlace(place) {
+        if (true || this.debug) console.log("onClickPlace", place);
+    }
+
+    onHoverPlace(place) {
+        if (this.debug) console.log("onHoverPlace", place);
     }
 
     // ============================================================
     // country methods
     styleCountry(d) {
-        return "geocountry" + (geograffiti.isVisitedCountry(parseInt(d.id)) ? " geovisited" : "");
+        return "geocountry" + (geodata.isVisited(parseInt(d.id)) ? " geovisited" : "");
     }
 
-    hoverCountry(d) {
-        this.onHoverCountry(d ? geograffiti.getCountry(d.id) : null);
+    hoverCountry(d, over) {
+        this.onHoverCountry(d ? geodata.getCountry(d.id) : null);
     }
 
     clickCountry(d) {
@@ -356,7 +379,7 @@ class GeoGlobe {
             d3.select("#geocountry" + id).classed("selected", true);
 
             // load country data
-            var c = geograffiti.getCountry(id);
+            var c = geodata.getCountry(id);
             // TODO: fix auto-scale to size
             /*
             //var dist = d3.geoDistance([0, 0], [2 * c.dlng, 2 * c.dlat]);
