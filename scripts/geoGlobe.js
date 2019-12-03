@@ -10,7 +10,6 @@ class GeoGlobe {
     
     topo = null; // topo data
     places = null; // place dots
-    flights = null; // flight arcs
 
     path = null; // path to refresh svgGlobe
     proj = null; // projection to modify path
@@ -102,21 +101,18 @@ class GeoGlobe {
     // ============================================================
     interval = null;
     tourClear() {
-        console.log("tourClear", this.interval);
         // cancel interval
         if (this.interval) {
             window.clearInterval(this.interval);
             this.interval = null;
         }
-        // remove previous point
+        // remove previous tour info
         this.svgGlobe.selectAll(".geoiconback").remove();
         this.svgGlobe.selectAll(".geoicon").remove();
         this.svgGlobe.selectAll("text").remove();
     }
     tourPlaces() {
-        console.log("tourPlaces", this.interval);
         this.tourClear();
-        
         // tour selected country
         if (this.selectedCountryID > 0)
         {
@@ -130,9 +126,7 @@ class GeoGlobe {
 
             var count = 0; 
             this.interval = window.setInterval(() => {
-                console.log("tick", this.interval);
-
-                // remove previous point
+                // remove previous tour info
                 this.svgGlobe.selectAll(".geoiconback").remove();
                 this.svgGlobe.selectAll(".geoicon").remove();
                 this.svgGlobe.selectAll("text").remove();
@@ -300,19 +294,21 @@ class GeoGlobe {
                             this.refresh();
                         };
                     })
-                .on("end", () => this.complete());
+                .on("end", () => this.tourPlaces());
         }
-    }
-
-    complete() {
-        console.log("complete");
-        this.tourPlaces();
     }
 
     // ============================================================
     // place methods
     hoverPlace(d) {
-        console.log("hoverPlace", d.id);
+        if (d && d.id) {
+            var key = d.id.replace("geoplace", "");
+            this.onHoverPlace(key);
+        }
+    }
+
+    onHoverPlace(key) {
+        if (this.debug) console.log("onHoverPlace", key);
     }
 
     // ============================================================
@@ -359,11 +355,9 @@ class GeoGlobe {
             this.selectedCountryID = id;
             d3.select("#geocountry" + id).classed("selected", true);
 
-            // show place data
-            //this.showPlaces();
-
             // load country data
             var c = geograffiti.getCountry(id);
+            // TODO: fix auto-scale to size
             /*
             //var dist = d3.geoDistance([0, 0], [2 * c.dlng, 2 * c.dlat]);
             var dist = 2 * (c.dlng > c.dlat ? c.dlng : c.dlat);
