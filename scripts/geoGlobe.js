@@ -101,6 +101,29 @@ class GeoGlobe {
 
     // ============================================================
     showCities() {
+        var points = [];
+        var center = this.proj.rotate();
+        this.places.filter(x => x.type == "City").forEach(place => {
+            var dist = d3.geoDistance(center, [-place.lng, -place.lat]);
+            if (dist < 1.57)
+            {
+                var point = this.proj([place.lng, place.lat]);
+                points.push({ cx: point[0], cy: point[1], id: "geoplace" + place.key });
+            }
+        });
+        this.svgGlobe.selectAll(".geocity").remove();
+        this.svgGlobe.selectAll(".geocity")
+            .data(points)
+            .enter()
+            .append("circle")
+            .on("mouseover", (d) => this.hoverPlace(d))
+            .attr("class", "geocity")
+			.attr("id", function (d) { return d.id; })
+			.attr("cx", function (d) { return d.cx; })
+			.attr("cy", function (d) { return d.cy; })
+			.attr("r", 2);
+    }
+    showCitiesAsPath() {
         var cities = this.places.filter(x => x.type == "City");
         var circle = d3.geoCircle();
         this.svgGlobe.selectAll(".geocity")
@@ -140,6 +163,7 @@ class GeoGlobe {
     // ============================================================
     // update svg with data
     refresh() {
+        this.showCities();
         this.svgGlobe.selectAll("path").attr("d", this.path);
     }
 
