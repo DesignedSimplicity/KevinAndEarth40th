@@ -380,13 +380,15 @@ class GeoGlobe {
 
             // load country data
             var c = geodata.getCountry(id);
-            // TODO: fix auto-scale to size
-            /*
-            //var dist = d3.geoDistance([0, 0], [2 * c.dlng, 2 * c.dlat]);
-            var dist = 2 * (c.dlng > c.dlat ? c.dlng : c.dlat);
-            var scale = 90 / dist;
-            console.log(dist);*/
-            this.animate([-c.lng, -c.lat], 2);
+            var dist = d3.geoDistance([c.lngMin, c.latMin], [c.lngMax, c.latMax]);
+            var lng = (c.lngMax + c.lngMin) / 2;
+            var lat = (c.latMax + c.latMin) / 2;
+            var scale = 1.57 / dist;
+            if (scale > 4) {
+                scale = 4;
+            }
+            this.animate([-lng, -lat], scale);
+            //this.animate([-c.lng, -c.lat], 2);
 
             // execute event handler
             this.onSelectCountry(c);
