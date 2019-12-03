@@ -108,16 +108,18 @@ class GeoGlobe {
             this.interval = null;
         }
         var places = this.places.filter(x => x.country === this.selectedCountryID);
-        places.forEach(x => {
-            console.log(x);
-            d3.select("#geoplace" + x.key).classed("selected", true);
-        })
-        //console.log(places.length);
-        /*
+        var points = [];
+        places.forEach(place => {
+            var radius = place.type == "City" ? 2 : 1;
+            var style = place.type == "City" ? "geocity" : "geoplace";
+            var point = this.proj([place.lng, place.lat]);
+            points.push({ id: "geoplace" + place.key, x: point[0], y: point[1], r: radius, s: style, c: place.country });
+        });
+
         var count = 0; 
         this.interval = window.setInterval(() => {
-            var place = places[count];
-            //console.log(place);
+            var point = points[count];
+            console.log(point);
             if (this.selectedPlace) {
                 //var cs = this.selectedPlace.attr("class").replace("selected", "");
                 //this.selectedPlace.attr("class", cs);
@@ -125,7 +127,18 @@ class GeoGlobe {
             //var cs = this.selectedPlace.attr("class").replace("selected", "");
             //this.selectedPlace.attr("class", cs);
             //console.log("#geoplace" + place.key);
-            d3.select("#geoplace" + place.key).classed("selected", true);
+            var data = [];
+            data.push(point);
+            this.svgGlobe.selectAll(".geopoint-tour").remove();
+            this.svgGlobe.selectAll(".geopoint-tour")
+                .data(data)
+                .enter()
+                .append("circle")
+                .attr("class", function (d) { return "geopoint geopoint-tour"; })
+                .attr("country", function (d) { return d.c; })
+                .attr("cx", function (d) { return d.x; })
+                .attr("cy", function (d) { return d.y; })
+                .attr("r", function (d) { return d.r * 2; });
             
 
             count++;
@@ -133,7 +146,7 @@ class GeoGlobe {
                 window.clearInterval(this.interval);
                 this.interval = null;
             }
-        }, 1000);*/
+        }, 1000);
     }
     showPlaces() {
         var points = [];
@@ -312,10 +325,15 @@ class GeoGlobe {
             d3.select("#geocountry" + id).classed("selected", true);
 
             // show place data
-            this.showPlaces();
+            //this.showPlaces();
 
             // load country data
             var c = geograffiti.getCountry(id);
+            /*
+            //var dist = d3.geoDistance([0, 0], [2 * c.dlng, 2 * c.dlat]);
+            var dist = 2 * (c.dlng > c.dlat ? c.dlng : c.dlat);
+            var scale = 90 / dist;
+            console.log(dist);*/
             this.animate([-c.lng, -c.lat], 2);
 
             // execute event handler
