@@ -119,6 +119,8 @@ class GeoGlobe {
         if (this.selectedCountryID > 0)
         {
             var iconSize = 16;
+            var scale = d3.zoomTransform(this.svgGlobe).k;
+            var scaleSize = iconSize * 2 / scale;
             var places = this.places.filter(x => x.country === this.selectedCountryID);
             var points = [];
             places.forEach(place => {
@@ -151,25 +153,26 @@ class GeoGlobe {
                     .attr("class", "geoiconback")
                     .attr("cx", function (d) { return d.x; })
                     .attr("cy", function (d) { return d.y; })
-                    .attr("r", function (d) { return iconSize / 1.5; });
+                    .attr("r", function (d) { return scaleSize / 1.5; });
                 this.svgGlobe.selectAll(".geoicon")
                     .data(data)
                     .enter()
                     .append("svg:image")
                     .attr("xlink:href", function (d) { return "/images/places/" + d.t + ".svg"; })
                     .attr("class", "geoicon")
-                    .attr("width", iconSize)
-                    .attr("height", iconSize)
-                    .attr("x", function (d) { return d.x - (iconSize / 2); })
-                    .attr("y", function (d) { return d.y - (iconSize / 2); })
+                    .attr("width", scaleSize)
+                    .attr("height", scaleSize)
+                    .attr("x", function (d) { return d.x - (scaleSize / 2); })
+                    .attr("y", function (d) { return d.y - (scaleSize / 2); })
                 this.svgGlobe.selectAll("text")
                     .data(data)
                     .enter()
                     .append("text")
                     .text(function (d) { return d.n; })
                     .attr("class", "geolabel")
+                    .attr("font-size", scaleSize + "px")
                     .attr("x", function (d) { return d.x; })
-                    .attr("y", function (d) { return d.y - (iconSize / 1.5); });
+                    .attr("y", function (d) { return d.y - (scaleSize / 1.5); });
                 
                 // increment and wait
                 count++;            
@@ -180,11 +183,14 @@ class GeoGlobe {
     showPlaces() {
         var points = [];
         var center = this.proj.rotate();
+        var scale = d3.zoomTransform(this.svgGlobe).k;
+        if (scale > 1.5) scale = scale / 1.5;
+        console.log("scale", scale);
         this.places.forEach(place => {
             var dist = d3.geoDistance(center, [-place.lng, -place.lat]);
             if (dist < 1.57)
             {
-                var radius = place.type == "City" ? 2 : 1;
+                var radius = (place.type == "City" ? 2 : 1) / scale;
                 var style = place.type == "City" ? "geocity" : "geoplace";
                 var point = this.proj([place.lng, place.lat]);
                 points.push({ id: "geoplace" + place.key, x: point[0], y: point[1], r: radius, s: style, c: place.country });
