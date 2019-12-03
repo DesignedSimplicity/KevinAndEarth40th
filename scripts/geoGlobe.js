@@ -104,6 +104,7 @@ class GeoGlobe {
     tourClear() {
         // remove previous point
         this.svgGlobe.selectAll(".geopoint.selected").remove();
+        this.svgGlobe.selectAll(".geoicon").remove();
         this.svgGlobe.selectAll("text").remove();
         if (this.interval) {
             window.clearInterval(this.interval);
@@ -111,6 +112,7 @@ class GeoGlobe {
         }
     }
     tourPlaces() {
+        var iconSize = 16;
         if (this.interval) {
             window.clearInterval(this.interval);
             this.interval = null;
@@ -120,13 +122,14 @@ class GeoGlobe {
         places.forEach(place => {
             var radius = place.type == "City" ? 6 : 2;
             var point = this.proj([place.lng, place.lat]);
-            points.push({ id: "geoplace" + place.key, x: point[0], y: point[1], r: radius, c: place.country, t: place.name });
+            points.push({ id: "geoplace" + place.key, x: point[0], y: point[1], r: radius, c: place.country, t:place.type, n: place.name });
         });
 
         var count = 0; 
         this.interval = window.setInterval(() => {
             // remove previous point
             this.svgGlobe.selectAll(".geopoint.selected").remove();
+            this.svgGlobe.selectAll(".geoicon").remove();
             this.svgGlobe.selectAll("text").remove();
 
             // repeat/break loop if done
@@ -142,6 +145,17 @@ class GeoGlobe {
             data.push(point);
 
             // render on map
+            this.svgGlobe.selectAll(".geoicon")
+                .data(data)
+                .enter()
+                .append("svg:image")
+                .attr("xlink:href", function (d) { return "/images/places/" + d.t + ".svg"; })
+                .attr("class", "geoicon")
+                .attr("width", iconSize)
+                .attr("height", iconSize)
+                .attr("x", function (d) { return d.x - (iconSize / 2); })
+                .attr("y", function (d) { return d.y - (iconSize / 2); })
+            /*
             this.svgGlobe.selectAll(".geopoint.selected")
                 .data(data)
                 .enter()
@@ -151,13 +165,14 @@ class GeoGlobe {
                 .attr("cx", function (d) { return d.x; })
                 .attr("cy", function (d) { return d.y; })
                 .attr("r", function (d) { return d.r; });
+            */
             this.svgGlobe.selectAll("text")
                 .data(data)
                 .enter()
                 .append("text")
-                .text(function (d) { return d.t; })
+                .text(function (d) { return d.n; })
                 .attr("x", function (d) { return d.x; })
-                .attr("y", function (d) { return d.y - d.r; })
+                .attr("y", function (d) { return d.y - (iconSize / 2); })
                 .attr("class", "geolabel");
             
             // increment and wait
