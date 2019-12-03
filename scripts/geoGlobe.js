@@ -122,13 +122,36 @@ class GeoGlobe {
     stylePlace(place) {
         switch (place.type.toLowerCase()) {
             case "city":
-                return [1.5, "geocity"];
+                return "geopoint geocity";
             default:
-                return [1, "geopoint"];
+                return "geopoint geoplace";
         }
     }
 
     showPlaces() {
+        var places = [];
+        if (this.selectedCountryID)
+            places = this.places.filter(x => x.country == this.selectedCountryID);
+        else
+            places = this.places.filter(x => x.type == "City");
+
+        var circle = d3.geoCircle();
+        this.svgGlobe.selectAll("path.geopoint").remove();
+        this.svgGlobe.selectAll("path.geopoint")
+            .data(places)
+            .enter()
+            .append("path")
+            .datum((d) => {
+                return circle
+                    .center([d.lng, d.lat])
+                    .radius(d.type.toLowerCase() == "city" ? 0.3 : 0.2)
+                    ();
+            })
+            .attr("class", (d) => { return this.stylePlace(d); })
+            .attr("d", this.path);
+    }
+
+    showPlaces2() {
         var points = [];
         var center = this.proj.rotate();
         //console.log("center", center[0], center[1]);
