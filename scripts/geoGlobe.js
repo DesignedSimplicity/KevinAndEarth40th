@@ -63,19 +63,16 @@ class GeoGlobe {
         this.proj = d3.geoOrthographic()
             .translate([this.width / 2, this.height / 2])
             .clipAngle(90)
-            .scale(this.scale)
-            .rotate([40, -5]);
+            .scale(this.scale);
 
         // render path used for globe
         this.path = d3.geoPath().projection(this.proj); //.pointRadius(2);
 
         // projection used for flights = globe * 1.25 to offset arcs above surface
-        /*
-        var projFlights = d3.geoOrthographic()
+        this.projFlights = d3.geoOrthographic()
             .translate([this.width / 2, this.height / 2])
             .clipAngle(90)
             .scale(this.scale * 1.25);
-        */
     }
     
     // ============================================================
@@ -107,33 +104,65 @@ class GeoGlobe {
         // load places data
         this.places = await d3.json("/data/places.json");
         this.showPlaces();
-
-        this.proj.rotate([77.1053673, -38.8858006]);
-        this.render();
     }
 
     async loadFlights() {
         // load flight data
         this.flights = await d3.json("/data/flights.json");
-
+        this.showFlights();
     }
 
     // ============================================================
-    stylePlace(place) {
-        switch (place.type.toLowerCase()) {
-            case "city":
-                return "geopoint geocity";
-            default:
-                return "geopoint geoplace";
+    showFlights() {
+        var swoosh = d3.line()
+            .x(function(d) { return d[0] })
+            .y(function(d) { return d[1] })
+            .curve(d3.curveCardinal.tension(0.1));
+        
+        var flights = [];
+        for(var i=0;i < this.flights.length - 1; i++) {
+            flights.push({ 
+                source: [ this.flights[i].lng, this.flights[i].lat],
+                target: [ this.flights[i+1].lng, this.flights[i+1].lat]
+            });
         }
+
+          // build geoJSON features from links array
+          var lines = [];
+          flights.forEach(function(e,i,a) {
+                var feature =   { "type": "Feature", "geometry": { "type": "LineString", "coordinates": [e.source,e.target] }}
+                lines.push(feature)
+            })
+
+            this.svgGlobe.selectAll(".flights").remove();
+            this.svgGlobe.append("g").attr("class","flights")
+            .selectAll("path").data(flights)
+            .enter().append("path")
+            .attr("class","flight")
+            .attr("d", (d) => { return swoosh(this.flying_arc(d)) })
+        
+          //refresh();
     }
 
+    flying_arc(pts) {
+        var source = pts.source,
+            target = pts.target;
+      
+        var mid = this.location_along_arc(source, target, .5);
+        var result = [ this.proj(source),
+            this.projFlights(mid),
+            this.proj(target) ]
+        return result;
+      }
+
+      location_along_arc(start, end, loc) {
+        var interpolator = d3.interpolate(start,end);
+        return interpolator(loc)
+      }
+
+
     showPlaces() {
-        var places = [];
-        if (this.selectedCountryID)
-            places = this.places.filter(x => x.country == this.selectedCountryID);
-        else
-            places = this.places.filter(x => x.type == "City");
+        var places = this.places.filter(x => x.type == "City" || x.country == this.selectedCountryID);
 
         var circle = d3.geoCircle();
         this.svgGlobe.selectAll("path.geopoint").remove();
@@ -147,38 +176,15 @@ class GeoGlobe {
                     .radius(d.type.toLowerCase() == "city" ? 0.3 : 0.2)
                     ();
             })
-            .attr("class", (d) => { return this.stylePlace(d); })
+            .attr("class", (d) => {
+                switch (d.type.toLowerCase()) {
+                    case "city":
+                        return "geopoint geocity";
+                    default:
+                        return "geopoint geoplace";
+                }
+             })
             .attr("d", this.path);
-    }
-
-    showPlaces2() {
-        var points = [];
-        var center = this.proj.rotate();
-        //console.log("center", center[0], center[1]);
-        this.places.forEach(place => {
-            //console.log("place", place.lng, place.lat);
-            var dlng = (center[0] + place.lng);
-            var dlat = (center[1] + place.lat);
-            console.log("delta", dlng, dlat);
-            //var distance = geograffiti.calculateDistance(center[0], center[1], place.lng, place.lat);
-            //if (distance <= 10000) {
-            if (true || dlng < 90 && dlat < 90) {
-                var style = this.stylePlace(place);
-                var point = this.proj([place.lng, place.lat]);
-                //console.log(point);
-                points.push({ x: point[0], y: point[1], r: style[0], t: style[1] });
-            }
-        });
-        
-        this.svgGlobe.selectAll("circle").remove();
-        this.svgGlobe.selectAll("circle")
-            .data(points)
-            .enter()
-            .append("circle")
-            .attr("cx", function (d) { return d.x; })
-            .attr("cy", function (d) { return d.y; })
-            .attr("r", function (d) { return d.r; })
-            .attr("class", function (d) { return d.t; });
     }
 
     // ============================================================
@@ -186,6 +192,7 @@ class GeoGlobe {
     render() {
         this.svgGlobe.selectAll(".geocountry").attr("d", this.path);
         this.showPlaces();
+        this.showFlights();
     }
 
     // drag globe
@@ -206,6 +213,9 @@ class GeoGlobe {
             var y = mouse[1] - this.dragMouse[1];
             var point = [this.dragPoint[0] + (mouse[0] - this.dragMouse[0]) / 4, this.dragPoint[1] + (this.dragMouse[1] - mouse[1]) / 4];
             this.proj.rotate([point[0], point[1]]);
+            
+            this.projFlights.rotate([point[0], point[1]]);
+            
             this.render();
         }
     }
