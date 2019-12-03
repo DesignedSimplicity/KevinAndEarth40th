@@ -129,16 +129,16 @@ class GeoGlobe {
             //console.log("#geoplace" + place.key);
             var data = [];
             data.push(point);
-            this.svgGlobe.selectAll(".geopoint-tour").remove();
-            this.svgGlobe.selectAll(".geopoint-tour")
+            this.svgGlobe.selectAll(".geopoint.selected").remove();
+            this.svgGlobe.selectAll(".geopoint.selected")
                 .data(data)
                 .enter()
                 .append("circle")
-                .attr("class", function (d) { return "geopoint geopoint-tour"; })
+                .attr("class", function (d) { return "geopoint selected"; })
                 .attr("country", function (d) { return d.c; })
                 .attr("cx", function (d) { return d.x; })
                 .attr("cy", function (d) { return d.y; })
-                .attr("r", function (d) { return d.r * 2; });
+                .attr("r", function (d) { return d.r * 3; });
             
 
             count++;
