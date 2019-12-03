@@ -101,8 +101,16 @@ class GeoGlobe {
 
     // ============================================================
     interval = null;
-    selectedPlace = null;
-    cyclePlaces() {
+    tourClear() {
+        // remove previous point
+        this.svgGlobe.selectAll(".geopoint.selected").remove();
+        this.svgGlobe.selectAll("text").remove();
+        if (this.interval) {
+            window.clearInterval(this.interval);
+            this.interval = null;
+        }
+    }
+    tourPlaces() {
         if (this.interval) {
             window.clearInterval(this.interval);
             this.interval = null;
@@ -110,26 +118,30 @@ class GeoGlobe {
         var places = this.places.filter(x => x.country === this.selectedCountryID);
         var points = [];
         places.forEach(place => {
-            var radius = place.type == "City" ? 2 : 1;
-            var style = place.type == "City" ? "geocity" : "geoplace";
+            var radius = place.type == "City" ? 6 : 2;
             var point = this.proj([place.lng, place.lat]);
-            points.push({ id: "geoplace" + place.key, x: point[0], y: point[1], r: radius, s: style, c: place.country });
+            points.push({ id: "geoplace" + place.key, x: point[0], y: point[1], r: radius, c: place.country, t: place.name });
         });
 
         var count = 0; 
         this.interval = window.setInterval(() => {
-            var point = points[count];
-            console.log(point);
-            if (this.selectedPlace) {
-                //var cs = this.selectedPlace.attr("class").replace("selected", "");
-                //this.selectedPlace.attr("class", cs);
+            // remove previous point
+            this.svgGlobe.selectAll(".geopoint.selected").remove();
+            this.svgGlobe.selectAll("text").remove();
+
+            // repeat/break loop if done
+            if (count >= places.length) {
+                count = 0;
+                //window.clearInterval(this.interval);
+                //this.interval = null;
             }
-            //var cs = this.selectedPlace.attr("class").replace("selected", "");
-            //this.selectedPlace.attr("class", cs);
-            //console.log("#geoplace" + place.key);
+
+            // get current point
+            var point = points[count];
             var data = [];
             data.push(point);
-            this.svgGlobe.selectAll(".geopoint.selected").remove();
+
+            // render on map
             this.svgGlobe.selectAll(".geopoint.selected")
                 .data(data)
                 .enter()
@@ -138,17 +150,23 @@ class GeoGlobe {
                 .attr("country", function (d) { return d.c; })
                 .attr("cx", function (d) { return d.x; })
                 .attr("cy", function (d) { return d.y; })
-                .attr("r", function (d) { return d.r * 3; });
+                .attr("r", function (d) { return d.r; });
+            this.svgGlobe.selectAll("text")
+                .data(data)
+                .enter()
+                .append("text")
+                .text(function (d) { return d.t; })
+                .attr("x", function (d) { return d.x; })
+                .attr("y", function (d) { return d.y - d.r; })
+                .attr("class", "geolabel");
             
-
-            count++;
-            if (count >= places.length) {
-                window.clearInterval(this.interval);
-                this.interval = null;
-            }
+            // increment and wait
+            count++;            
         }, 1000);
     }
+
     showPlaces() {
+        this.tourClear();
         var points = [];
         var center = this.proj.rotate();
         this.places.forEach(place => {
@@ -272,7 +290,7 @@ class GeoGlobe {
 
     complete() {
         console.log("complete");
-        this.cyclePlaces();
+        this.tourPlaces();
     }
 
     // ============================================================
