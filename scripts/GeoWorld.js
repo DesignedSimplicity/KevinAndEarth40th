@@ -52,27 +52,21 @@ class GeoWorld {
         if (this.zoomable) {
             var zoomCall = d3.zoom()
                 //.duration(1000)
-                //.wheelDelta(() => (-0.1 * d3.event.deltaY))
+                .wheelDelta(() => (-0.1 * d3.event.deltaY))
                 .on("zoom", () => this.zoomTo(d3.event.transform.k));
-            this.svgGlobe.call(zoomCall)
-                .on("wheel.zoom", null) // disable wheel zoom
-                .on("dblclick.zoom", null); // disable double click
+            this.svgGlobe.call(zoomCall);
+                //.on("wheel.zoom", null) // disable wheel zoom
+                //.on("dblclick.zoom", null); // disable double click
         }
 
         // projection used for globe
-        this.proj = d3.geoOrthographic()
-            .translate([this.width / 2, this.height / 2])
-            .clipAngle(90)
-            .scale(this.scale);
+        this.proj = d3.geoMercator();
 
         // render path used for globe
         this.path = d3.geoPath().projection(this.proj); //.pointRadius(2);
 
         // projection used for flights = globe * 1.25 to offset arcs above surface
-        this.projFlights = d3.geoOrthographic()
-            .translate([this.width / 2, this.height / 2])
-            .clipAngle(90)
-            .scale(this.scale * 1.25);
+        this.projFlights = d3.geoMercator();
     }
     
     // ============================================================
@@ -117,7 +111,7 @@ class GeoWorld {
         var swoosh = d3.line()
             .x(function(d) { return d[0] })
             .y(function(d) { return d[1] })
-            .curve(d3.curveCardinal.tension(0.1));
+            .curve(this.flightCurve);
         
         var flights = [];
         for(var i=0;i < this.flights.length - 1; i++) {
@@ -139,27 +133,42 @@ class GeoWorld {
             .selectAll("path").data(flights)
             .enter().append("path")
             .attr("class","flight")
-            .attr("d", (d) => { return swoosh(this.flying_arc(d)) })
+            .attr("d", (d) => { return swoosh([ this.proj(d.source), this.proj(d.target) ]) })
         
           //refresh();
     }
 
-    flying_arc(pts) {
-        var source = pts.source,
-            target = pts.target;
-      
-        var mid = this.location_along_arc(source, target, .5);
-        var result = [ this.proj(source),
-            this.projFlights(mid),
-            this.proj(target) ]
-        return result;
+    flightCurve(context) {
+        var custom = d3.curveLinear(context);
+        custom._context = context;
+        custom.point = function(x,y) {
+          x = +x, y = +y;
+          switch (this._point) {
+            case 0: this._point = 1; 
+              this._line ? this._context.lineTo(x, y) : this._context.moveTo(x, y);
+              this.x0 = x; this.y0 = y;        
+              break;
+            case 1: this._point = 2;
+            default: 
+              var x1 = this.x0 * 0.5 + x * 0.5;
+              var y1 = this.y0 * 0.5 + y * 0.5;
+              var m = 1/(y1 - y)/(x1 - x);
+              var r = -100; // offset of mid point.
+              var k = r / Math.sqrt(1 + (m*m) );
+              if (m == Infinity) {
+                y1 += r;
+              }
+              else {
+                y1 += k;
+                x1 += m*k;
+              }     
+              this._context.quadraticCurveTo(x1,y1,x,y); 
+              this.x0 = x; this.y0 = y;        
+              break;
+          }
+        }
+        return custom;
       }
-
-      location_along_arc(start, end, loc) {
-        var interpolator = d3.interpolate(start,end);
-        return interpolator(loc)
-      }
-
 
     showPlaces() {
         var places = this.places.filter(x => x.type == "City" || x.country == this.selectedCountryID);
@@ -206,15 +215,15 @@ class GeoWorld {
 
         if (start) {
             this.dragMouse = mouse;
-            this.dragPoint = this.proj.rotate();
+            this.dragPoint = this.proj.center();
         }
         else {
             var x = mouse[0] - this.dragMouse[0];
             var y = mouse[1] - this.dragMouse[1];
             var point = [this.dragPoint[0] + (mouse[0] - this.dragMouse[0]) / 4, this.dragPoint[1] + (this.dragMouse[1] - mouse[1]) / 4];
-            this.proj.rotate([point[0], point[1]]);
+            this.proj.center([point[0], point[1]]);
             
-            this.projFlights.rotate([point[0], point[1]]);
+            this.projFlights.center([point[0], point[1]]);
             
             this.render();
         }
@@ -230,18 +239,18 @@ class GeoWorld {
     // rotate and scale animation
     animate(r, k) { // rotate, scale
         var iT = d3.zoomTransform(this.svgGlobe);
-        if (r != this.proj.rotate() || k != iT.k)
+        if (r != this.proj.center() || k != iT.k)
         {
             d3.transition()
                 .duration(750)
                 .tween("animate", 
                     () => {
                         var iK = d3.interpolate(iT.k, k);
-                        var iR = d3.interpolate(this.proj.rotate(), r);
+                        var iR = d3.interpolate(this.proj.center(), r);
                         return (i) => {
                             iT.k = iK(i);
                             this.svgGlobe.attr("transform", iT);
-                            this.proj.rotate(iR(i));
+                            this.proj.center(iR(i));
                             this.render();
                         };
                     });
@@ -272,7 +281,7 @@ class GeoWorld {
             // execute event handler
             this.onSelectCountry();
             // reset zoom level
-            this.animate(this.proj.rotate(), 1);
+            this.animate(this.proj.center(), 1);
         }
     }
 

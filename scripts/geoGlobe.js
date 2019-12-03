@@ -96,33 +96,35 @@ class GeoGlobe {
     async loadPlaces() {
         // load places data
         this.places = await d3.json("/data/places.json");
-        this.showCities();
+        this.showPlaces();
     }
 
     // ============================================================
-    showCities() {
+    showPlaces() {
         var points = [];
         var center = this.proj.rotate();
-        this.places.filter(x => x.type == "City").forEach(place => {
+        this.places.forEach(place => {
             var dist = d3.geoDistance(center, [-place.lng, -place.lat]);
             if (dist < 1.57)
             {
+                var radius = place.type == "City" ? 2 : 1;
+                var style = place.type == "City" ? "geocity" : "geoplace";
                 var point = this.proj([place.lng, place.lat]);
-                points.push({ cx: point[0], cy: point[1], id: "geoplace" + place.key });
+                points.push({ x: point[0], y: point[1], r: radius, s: style, id: "geoplace" + place.key });
             }
         });
-        this.svgGlobe.selectAll(".geocity").remove();
-        this.svgGlobe.selectAll(".geocity")
+        this.svgGlobe.selectAll("circle").remove();
+        this.svgGlobe.selectAll("circle")
             .data(points)
             .enter()
             .append("circle")
-            .on("mouseover", (d) => this.hoverPlace(d))
-            .attr("class", "geocity")
-			.attr("id", function (d) { return d.id; })
-			.attr("cx", function (d) { return d.cx; })
-			.attr("cy", function (d) { return d.cy; })
-			.attr("r", 2);
+            .attr("class", function (d) { return "geopoint " + d.s; })
+			.attr("cx", function (d) { return d.x; })
+			.attr("cy", function (d) { return d.y; })
+            .attr("r", function (d) { return d.r; })
+            .on("mouseover", (d) => this.hoverPlace(d));
     }
+    /*
     showCitiesAsPath() {
         var cities = this.places.filter(x => x.type == "City");
         var circle = d3.geoCircle();
@@ -141,7 +143,7 @@ class GeoGlobe {
             .attr("id", (d) => "geoplace" + d.key)
             .attr("class", "geocity");
     }
-    showPlaces() {
+    showPlacesAsPath() {
         var places = this.places.filter(x => x.country == this.selectedCountryID);
         var circle = d3.geoCircle();
         this.svgGlobe.selectAll(".geoplace").remove();
@@ -159,12 +161,13 @@ class GeoGlobe {
             .attr("d", this.path)
             .on("mouseover", (d) => this.hoverPlace(d));
     }
+    */
 
     // ============================================================
     // update svg with data
     refresh() {
-        this.showCities();
         this.svgGlobe.selectAll("path").attr("d", this.path);
+        this.showPlaces();
     }
 
     // drag globe
