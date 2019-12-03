@@ -102,86 +102,86 @@ class GeoGlobe {
     // ============================================================
     interval = null;
     tourClear() {
+        console.log("tourClear", this.interval);
+        // cancel interval
+        if (this.interval) {
+            window.clearInterval(this.interval);
+            this.interval = null;
+        }
         // remove previous point
-        this.svgGlobe.selectAll(".geopoint.selected").remove();
+        this.svgGlobe.selectAll(".geoiconback").remove();
         this.svgGlobe.selectAll(".geoicon").remove();
         this.svgGlobe.selectAll("text").remove();
-        if (this.interval) {
-            window.clearInterval(this.interval);
-            this.interval = null;
-        }
     }
     tourPlaces() {
-        var iconSize = 16;
-        if (this.interval) {
-            window.clearInterval(this.interval);
-            this.interval = null;
+        console.log("tourPlaces", this.interval);
+        this.tourClear();
+        
+        // tour selected country
+        if (this.selectedCountryID > 0)
+        {
+            var iconSize = 16;
+            var places = this.places.filter(x => x.country === this.selectedCountryID);
+            var points = [];
+            places.forEach(place => {
+                var point = this.proj([place.lng, place.lat]);
+                points.push({ x: point[0], y: point[1], t:place.type, n: place.name });
+            });
+
+            var count = 0; 
+            this.interval = window.setInterval(() => {
+                console.log("tick", this.interval);
+
+                // remove previous point
+                this.svgGlobe.selectAll(".geoiconback").remove();
+                this.svgGlobe.selectAll(".geoicon").remove();
+                this.svgGlobe.selectAll("text").remove();
+
+                // repeat/break loop if done
+                if (count >= places.length) {
+                    count = 0;
+                }
+
+                // get current point
+                var point = points[count];
+                var data = [];
+                data.push(point);
+
+                // render on map
+                this.svgGlobe.selectAll(".geoiconback")
+                    .data(data)
+                    .enter()
+                    .append("circle")
+                    .attr("class", "geoiconback")
+                    .attr("cx", function (d) { return d.x; })
+                    .attr("cy", function (d) { return d.y; })
+                    .attr("r", function (d) { return iconSize / 1.5; });
+                this.svgGlobe.selectAll(".geoicon")
+                    .data(data)
+                    .enter()
+                    .append("svg:image")
+                    .attr("xlink:href", function (d) { return "/images/places/" + d.t + ".svg"; })
+                    .attr("class", "geoicon")
+                    .attr("width", iconSize)
+                    .attr("height", iconSize)
+                    .attr("x", function (d) { return d.x - (iconSize / 2); })
+                    .attr("y", function (d) { return d.y - (iconSize / 2); })
+                this.svgGlobe.selectAll("text")
+                    .data(data)
+                    .enter()
+                    .append("text")
+                    .text(function (d) { return d.n; })
+                    .attr("class", "geolabel")
+                    .attr("x", function (d) { return d.x; })
+                    .attr("y", function (d) { return d.y - (iconSize / 1.5); });
+                
+                // increment and wait
+                count++;            
+            }, 1000);
         }
-        var places = this.places.filter(x => x.country === this.selectedCountryID);
-        var points = [];
-        places.forEach(place => {
-            var radius = place.type == "City" ? 6 : 2;
-            var point = this.proj([place.lng, place.lat]);
-            points.push({ id: "geoplace" + place.key, x: point[0], y: point[1], r: radius, c: place.country, t:place.type, n: place.name });
-        });
-
-        var count = 0; 
-        this.interval = window.setInterval(() => {
-            // remove previous point
-            this.svgGlobe.selectAll(".geopoint.selected").remove();
-            this.svgGlobe.selectAll(".geoicon").remove();
-            this.svgGlobe.selectAll("text").remove();
-
-            // repeat/break loop if done
-            if (count >= places.length) {
-                count = 0;
-                //window.clearInterval(this.interval);
-                //this.interval = null;
-            }
-
-            // get current point
-            var point = points[count];
-            var data = [];
-            data.push(point);
-
-            // render on map
-            this.svgGlobe.selectAll(".geoicon")
-                .data(data)
-                .enter()
-                .append("svg:image")
-                .attr("xlink:href", function (d) { return "/images/places/" + d.t + ".svg"; })
-                .attr("class", "geoicon")
-                .attr("width", iconSize)
-                .attr("height", iconSize)
-                .attr("x", function (d) { return d.x - (iconSize / 2); })
-                .attr("y", function (d) { return d.y - (iconSize / 2); })
-            /*
-            this.svgGlobe.selectAll(".geopoint.selected")
-                .data(data)
-                .enter()
-                .append("circle")
-                .attr("class", function (d) { return "geopoint selected"; })
-                .attr("country", function (d) { return d.c; })
-                .attr("cx", function (d) { return d.x; })
-                .attr("cy", function (d) { return d.y; })
-                .attr("r", function (d) { return d.r; });
-            */
-            this.svgGlobe.selectAll("text")
-                .data(data)
-                .enter()
-                .append("text")
-                .text(function (d) { return d.n; })
-                .attr("x", function (d) { return d.x; })
-                .attr("y", function (d) { return d.y - (iconSize / 2); })
-                .attr("class", "geolabel");
-            
-            // increment and wait
-            count++;            
-        }, 1000);
     }
 
     showPlaces() {
-        this.tourClear();
         var points = [];
         var center = this.proj.rotate();
         this.places.forEach(place => {
@@ -262,6 +262,7 @@ class GeoGlobe {
         }
 
         if (start) {
+            this.tourClear();
             this.dragMouse = mouse;
             this.dragPoint = this.proj.rotate();
         }
@@ -343,6 +344,7 @@ class GeoGlobe {
     }
 
     clearCountry() {
+        this.tourClear();
         if (this.selectedCountryID > 0) {
             d3.select("#geocountry" + this.selectedCountryID).classed("selected", false);
             this.selectedCountryID = 0;
