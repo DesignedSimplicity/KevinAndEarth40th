@@ -2682,10 +2682,10 @@ geodata._countries = [{
     "name": "United States",
     "lat": 37.09024,
     "lng": -95.712891,
-    "latMin": 25.82,
-    "lngMin": -124.39,
-    "latMax": 49.38,
-    "lngMax": -66.94
+    "latMin": 24,
+    "lngMin": -160,
+    "latMax": 60,
+    "lngMax": -65
 }, {
     "id": 850,
     "continent": 3,

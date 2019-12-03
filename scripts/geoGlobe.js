@@ -185,7 +185,6 @@ class GeoGlobe {
         var center = this.proj.rotate();
         var scale = d3.zoomTransform(this.svgGlobe).k;
         if (scale > 1.5) scale = scale / 1.5;
-        console.log("scale", scale);
         this.places.forEach(place => {
             var dist = d3.geoDistance(center, [-place.lng, -place.lat]);
             if (dist < 1.57)
