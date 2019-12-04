@@ -1,41 +1,42 @@
 class GeoData {
-    _countries = [];
-    _visited = [];
-    _places = [];
-
+    /*
+    countries = [];
+    visited = [];
+    places = [];
+    */
     getCountry(id) {
         if (Number(id)) {
-            for (var i = 0; i < geodata._countries.length; i++) {
-                if (geodata._countries[i].id == id) return geodata._countries[i];
+            for (var i = 0; i < geodata.countries.length; i++) {
+                if (geodata.countries[i].id == id) return geodata.countries[i];
             }
         }
         else if (id != null && id.length > 0) {
             id = id.toLowerCase();
-            for (var i = 0; i < geodata._countries.length; i++) {
-                if (geodata._countries[i].key.toLowerCase() == id) return geodata._countries[i];
+            for (var i = 0; i < geodata.countries.length; i++) {
+                if (geodata.countries[i].key.toLowerCase() == id) return geodata.countries[i];
             }
         }
         return null;
     }
 
     isVisited(id) {
-        return geodata._visited.includes(id);
+        return geodata.visited.includes(id);
     }
 
     setPlaces(places) {
-        geodata._places = places;
+        geodata.places = places;
     }
 
     getPlace(id) {
         if (Number(id)) {
-            for (var i = 0; i < geodata._places.length; i++) {
-                if (geodata._places[i].id == id) return geodata._places[i];
+            for (var i = 0; i < geodata.places.length; i++) {
+                if (geodata.places[i].id == id) return geodata.places[i];
             }
         }
         else if (id != null && id.length > 0) {
             id = id.toLowerCase();
-            for (var i = 0; i < geodata._places.length; i++) {
-                if (geodata._places[i].key.toLowerCase() == id) return geodata._places[i];
+            for (var i = 0; i < geodata.places.length; i++) {
+                if (geodata.places[i].key.toLowerCase() == id) return geodata.places[i];
             }
         }
         return null;
@@ -45,8 +46,8 @@ class GeoData {
 
 // ====================================================================================================
 var geodata = new GeoData();
-geodata._visited = [756, 242, 352, 858, 392, 124, 10, 32, 76, 152, 36, 40, 56, 156, 250, 276, 344, 356, 372, 380, 388, 484, 496, 528, 554, 643, 702, 724, 826, 840];
-geodata._countries = [{
+geodata.visited = [756, 242, 352, 858, 392, 124, 10, 32, 76, 152, 36, 40, 56, 156, 250, 276, 344, 356, 372, 380, 388, 484, 496, 528, 554, 643, 702, 724, 826, 840];
+geodata.countries = [{
     "id": 4,
     "continent": 1,
     "key": "AF",

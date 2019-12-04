@@ -1,4 +1,5 @@
 class GeoGlobe {
+    /*
     // container
     divID = "globe";
     width = null;
@@ -19,8 +20,14 @@ class GeoGlobe {
     debug = false;
 
     selectedCountryID = 0;
-
+    */
     constructor() {
+        this.divID = "globe";
+        this.interval = null;
+
+        this.dragable = true;
+        this.dragMouse = [0, 0];
+        this.dragPoint = [0, 0];
     }
     
     init() {
@@ -101,7 +108,7 @@ class GeoGlobe {
     }
 
     // ============================================================
-    interval = null;
+    //interval = null;
     tourClear() {
         // cancel interval
         if (this.interval) {
@@ -256,8 +263,8 @@ class GeoGlobe {
     }
 
     // drag globe
-    dragMouse = [0, 0];
-    dragPoint = [0, 0];
+    //dragMouse = [0, 0];
+    //dragPoint = [0, 0];
     dragGlobe(start) {
         // prevent dragging while selected
         if (this.selectedCountryID > 0) {
