@@ -70,8 +70,8 @@ class GeoGlobe {
     
     // ============================================================
     async load() {
-        this.loadTopo();
-        this.loadPlaces();
+        await this.loadTopo();
+        await this.loadPlaces();
     }
 
     async loadTopo() {
@@ -321,9 +321,13 @@ class GeoGlobe {
     }
 
     clickPlace(d) {
+        if (d3.event) {
+            d3.event.stopPropagation();
+        }
         if (d && d.id) {
             var key = d.id.replace("geoplace", "");
             var place = geodata.getPlace(key);
+            this.selectCountry(place.country);
             this.onClickPlace(place);
         }
         else {
@@ -332,7 +336,7 @@ class GeoGlobe {
     }
 
     onClickPlace(place) {
-        if (true || this.debug) console.log("onClickPlace", place);
+        if (this.debug) console.log("onClickPlace", place);
     }
 
     onHoverPlace(place) {
