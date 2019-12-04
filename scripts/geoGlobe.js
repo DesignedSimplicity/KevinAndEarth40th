@@ -259,11 +259,18 @@ class GeoGlobe {
     dragMouse = [0, 0];
     dragPoint = [0, 0];
     dragGlobe(start) {
+        // prevent dragging while selected
+        if (this.selectedCountryID > 0) {
+            return;
+        }
+
+        // toggle mouse/touch source
         var mouse = [d3.event.sourceEvent.pageX, d3.event.sourceEvent.pageY];
         if (d3.event.sourceEvent.changedTouches != null && d3.event.sourceEvent.changedTouches.length > 0) {
             mouse = [d3.event.sourceEvent.changedTouches[0].pageX, d3.event.sourceEvent.changedTouches[0].pageY];
         }
 
+        // start or continue drag
         if (start) {
             this.tourClear();
             this.dragMouse = mouse;
@@ -383,6 +390,8 @@ class GeoGlobe {
     selectCountry(id) {
         // set selection
         if (this.selectedCountryID != id) {
+            console.log("selectCountry", this.dragable);
+
             this.clearCountry();
             this.selectedCountryID = id;
             d3.select("#geocountry" + id).classed("selected", true);
