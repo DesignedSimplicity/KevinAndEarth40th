@@ -1,6 +1,6 @@
 class GeoGlobe {
     // container
-    divID = "earth";
+    divID = "globe";
     width = null;
     height = null;
     

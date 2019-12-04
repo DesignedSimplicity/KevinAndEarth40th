@@ -1,0 +1,128 @@
+/* GLOBAL */
+
+body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    color: #fff;
+    background: #000;
+    overflow: hidden;
+    font-family: 'Amatic SC', 'Arial Narrow', Arial, sans-serif;
+}
+
+hr {
+    margin: 1rem;
+}
+
+/* PAGE */
+
+#head {
+    font-size: 5rem;
+    font-weight: normal;
+    text-align: center;
+    padding: 0;
+    margin: 0 auto;
+}
+
+#info {
+    position: absolute;
+    bottom: 0px;
+    left: 0px;
+    width: 100%;
+    color: #eee;
+    background: #000;
+    text-align: center;
+    font-size: 3rem;
+    padding: 5px;
+}
+
+#info>* {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+#info>img {
+    height: 40px;
+    padding: 10px;
+}
+
+/* GLOBE */
+#globe {
+    z-index: -1;
+  overflow: hidden;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 100%;
+  bottom: 100%;
+  width: 100%;
+  height: 100%;
+  background: #111;
+}
+
+/* MAP */
+
+.geocountry {
+    fill: #222;
+    stroke: #777;
+}
+
+.geocountry:hover {
+    fill: #333;
+    stroke: #777;
+}
+
+.geovisited {
+    fill: #030;
+    stroke: #060;
+}
+
+.geovisited:hover {
+    fill: #050;
+    stroke: #080;
+}
+
+.geovisited.selected {
+    fill: #070;
+    stroke: #0a0;
+}
+
+.geopoint {
+    opacity: 0.8;
+}
+
+.geopoint:hover {
+    opacity: 1;
+}
+
+.geopoint.selected {
+    stroke-width: 2;
+    stroke: #fff;
+    fill: #00c;
+    opacity: 1;
+}
+
+.geoicon {
+    fill: #fff;
+}
+
+.geoiconback {
+    fill: #006;
+}
+
+.geolabel {
+    fill: #fff;
+    stroke: #003;
+    stroke-width: 2;
+    paint-order: stroke fill;
+    text-anchor: middle;
+}
+
+.geoplace {
+    fill: #ccc;
+}
+
+.geocity {
+    fill: #fff;
+}
