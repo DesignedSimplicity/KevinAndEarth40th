@@ -104,26 +104,26 @@ class GeoWorld {
         var flights = [];
         for(var i=0;i < this.flights.length - 1; i++) {
             flights.push({ 
-                source: [ this.flights[i].lng, this.flights[i].lat],
-                target: [ this.flights[i+1].lng, this.flights[i+1].lat]
+                source: this.proj([ this.flights[i].lng, this.flights[i].lat]),
+                target: this.proj([ this.flights[i+1].lng, this.flights[i+1].lat])
             });
         }
 
           // build geoJSON features from links array
           var lines = [];
-          flights.forEach(function(e,i,a) {
-                var feature =   { "type": "Feature", "geometry": { "type": "LineString", "coordinates": [e.source,e.target] }}
+          flights.forEach(function(e) {
+                var feature = { "type": "LineString", "coordinates": [e.source, e.target] }
                 lines.push(feature)
             })
 
-            this.svgGlobe.selectAll(".flights").remove();
-            this.svgGlobe.append("g").attr("class","flights")
-            .selectAll("path").data(flights)
-            .enter().append("path")
-            .attr("class","flight")
-            .attr("d", (d) => { return swoosh([ this.proj(d.source), this.proj(d.target) ]) })
-        
-          //refresh();
+            this.svgGlobe.selectAll(".flight").remove();
+            this.svgGlobe
+                .data(lines)
+                .enter()
+                .append("path")
+                .attr("class", "flight")
+                .attr("d", (d) => { return d.path; })
+                .exit();
     }
 
     flightCurve(context) {
@@ -185,35 +185,9 @@ class GeoWorld {
     }
 
     moveWorld() {
-       this.svgGlobe.selectAll('path') // To prevent stroke width from scaling
-        .attr('transform', d3.event.transform);
-    }
-
-    // drag globe
-    dragWorld(start) {
-        // prevent dragging while selected
-        if (this.selectedCountryID > 0) {
-            return;
-        }
-
-        // toggle mouse/touch source
-        var mouse = [d3.event.sourceEvent.pageX, d3.event.sourceEvent.pageY];
-        if (d3.event.sourceEvent.changedTouches != null && d3.event.sourceEvent.changedTouches.length > 0) {
-            mouse = [d3.event.sourceEvent.changedTouches[0].pageX, d3.event.sourceEvent.changedTouches[0].pageY];
-        }
-
-        // start or continue drag
-        if (start) {
-            this.dragMouse = mouse;
-            this.dragPoint = this.proj.center();
-        }
-        else {
-            var x = mouse[0] - this.dragMouse[0];
-            var y = mouse[1] - this.dragMouse[1];
-            var point = [this.dragPoint[0] + (mouse[0] - this.dragMouse[0]) / 4, this.dragPoint[1] + (this.dragMouse[1] - mouse[1]) / 4];
-            this.proj.center([point[0], point[1]]);
-            this.refresh();
-        }
+        this.svgGlobe
+            .selectAll("path")
+            .attr("transform", d3.event.transform);
     }
 
     // zoom to set scale without animation
@@ -226,18 +200,18 @@ class GeoWorld {
     // rotate and scale animation
     animate(r, k) { // rotate, scale
         var iT = d3.zoomTransform(this.svgGlobe);
-        if (r != this.proj.rotate() || k != iT.k)
+        if (r != this.proj.center() || k != iT.k)
         {
             d3.transition()
                 .duration(750)
                 .tween("animate", 
                     () => {
                         var iK = d3.interpolate(iT.k, k);
-                        var iR = d3.interpolate(this.proj.rotate(), r);
+                        var iR = d3.interpolate(this.proj.center(), r);
                         return (i) => {
                             iT.k = iK(i);
                             this.svgGlobe.attr("transform", iT);
-                            this.proj.rotate(iR(i));
+                            this.proj.center(iR(i));
                             this.refresh();
                         };
                     });
@@ -305,12 +279,11 @@ class GeoWorld {
             // execute event handler
             this.onSelectCountry();
             // reset zoom level
-            this.animate(this.proj.rotate(), 1);
+            this.animate(this.proj.center(), 1);
         }
     }
 
     clearCountry() {
-        this.tourClear();
         if (this.selectedCountryID > 0) {
             d3.select("#geocountry" + this.selectedCountryID).classed("selected", false);
             this.selectedCountryID = 0;
@@ -336,7 +309,7 @@ class GeoWorld {
             if (scale > 4) {
                 scale = 4;
             }
-            this.animate([-lng, -lat], scale);
+            this.animate([lng, lat], scale);
             //this.animate([-c.lng, -c.lat], 2);
 
             // execute event handler
