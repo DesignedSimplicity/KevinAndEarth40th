@@ -1,33 +1,27 @@
 class GeoGlobe {
-    /*
-    // container
-    divID = "globe";
-    width = null;
-    height = null;
-    
-    // SVG image
-    svgGlobe = null;
-    scale = null;
-    
-    topo = null; // topo data
-    places = null; // place dots
-
-    path = null; // path to refresh svgGlobe
-    proj = null; // projection to modify path
-
-    zoomable = false;
-    dragable = true;
-    debug = false;
-
-    selectedCountryID = 0;
-    */
     constructor() {
         this.divID = "globe";
+        this.width = 100;
+        this.height = 100;
+
+        this.svgGlobe = null;
+        this.scale = 1;
+
+        this.topo = null; // topo data
+        this.places = null; // place dots
+        
+        this.path = null; // path to refresh svgGlobe
+        this.proj = null; // projection to modify path
+    
         this.interval = null;
 
+        this.debug = false;
+        this.zoomable = false;
         this.dragable = true;
         this.dragMouse = [0, 0];
         this.dragPoint = [0, 0];
+
+        this.selectedCountryID = 0;
     }
     
     init() {
@@ -83,7 +77,7 @@ class GeoGlobe {
 
     async loadTopo() {
         // load required topo json data
-        this.topo = await d3.json("/data/topo/world.json");
+        this.topo = await d3.json("/data/topo/globe.json");
         var features = topojson.feature(this.topo, this.topo.objects.countries).features;
 
         // refresh countries on globe
@@ -108,7 +102,6 @@ class GeoGlobe {
     }
 
     // ============================================================
-    //interval = null;
     tourClear() {
         // cancel interval
         if (this.interval) {
@@ -263,8 +256,6 @@ class GeoGlobe {
     }
 
     // drag globe
-    //dragMouse = [0, 0];
-    //dragPoint = [0, 0];
     dragGlobe(start) {
         // prevent dragging while selected
         if (this.selectedCountryID > 0) {

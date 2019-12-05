@@ -1,27 +1,29 @@
 class GeoWorld {
-    // container
-    divID = "earth";
-    width = null;
-    height = null;
-    
-    // SVG image
-    svgGlobe = null;
-    scale = null;
-    
-    topo = null; // topo data
-    places = null; // place dots
-    flights = null; // flight arcs
-
-    path = null; // path to render svgGlobe
-    proj = null; // projection to modify path
-
-    zoomable = false;
-    dragable = true;
-    debug = false;
-
-    selectedCountryID = 0;
-
     constructor() {
+        this.divID = "world";
+        this.width = 100;
+        this.height = 100;
+
+        this.svgGlobe = null;
+        this.scale = 1;
+        this.rotate = 60;
+        this.maxlat = 83;
+
+        this.topo = null; // topo data
+        this.places = null; // place dots
+        
+        this.path = null; // path to refresh svgGlobe
+        this.proj = null; // projection to modify path
+    
+        this.interval = null;
+
+        this.debug = false;
+        this.zoomable = true;
+        this.dragable = true;
+        this.dragMouse = [0, 0];
+        this.dragPoint = [0, 0];
+
+        this.selectedCountryID = 0;
     }
     
     init() {
@@ -29,74 +31,60 @@ class GeoWorld {
         var div = document.getElementById(this.divID);
         this.width = div.offsetWidth;
         this.height = div.offsetHeight;
-        var minSize = (this.height < this.width ? this.height : this.width);
-        this.scale = (minSize / 2);
 
-        // root svgGlobe to render all paths
+        // root svgGlobe to refresh all paths
         this.svgGlobe = d3.select("#" + this.divID)
             .append("svg")
             .attr("width", this.width)
             .attr("height", this.height);
 
-        // setup drag events
-        if (this.dragable)
-        {
-            var dragCall = d3.drag()
-                .on("start", () => this.dragGlobe(true))
-                .on("drag", () => this.dragGlobe(false))
-                //.on("end", function () {});
-            this.svgGlobe.call(dragCall);
-        }
+        // projection used for globe
+        this.proj = d3.geoMercator()
+            .translate([this.width / 2, this.height / 2])
+            .scale((this.width - 1) / 2 / Math.PI);
 
         // setup zoom events
         if (this.zoomable) {
             var zoomCall = d3.zoom()
-                //.duration(1000)
-                .wheelDelta(() => (-0.1 * d3.event.deltaY))
-                .on("zoom", () => this.zoomTo(d3.event.transform.k));
+                .scaleExtent([1, 8])
+                .on("zoom", () => this.moveWorld());
             this.svgGlobe.call(zoomCall);
-                //.on("wheel.zoom", null) // disable wheel zoom
-                //.on("dblclick.zoom", null); // disable double click
         }
 
-        // projection used for globe
-        this.proj = d3.geoMercator();
-
-        // render path used for globe
-        this.path = d3.geoPath().projection(this.proj); //.pointRadius(2);
-
-        // projection used for flights = globe * 1.25 to offset arcs above surface
-        this.projFlights = d3.geoMercator();
+        // refresh path used for globe
+        this.path = d3.geoPath().projection(this.proj);
     }
     
     // ============================================================
     async load() {
-        this.loadTopo();
-        this.loadPlaces();
-        this.loadFlights();
+        await this.loadTopo();
+        await this.loadPlaces();
+        await this.loadFlights();
     }
 
     async loadTopo() {
         // load required topo json data
-        this.topo = await d3.json("/data/topo/world.json");
+        this.topo = await d3.json("/data/topo/50m.json");
         var features = topojson.feature(this.topo, this.topo.objects.countries).features;
 
-        // render countries on globe
-        this.svgGlobe.on("click", (d) => this.clickCountry(d));
+        // refresh countries on globe
+        this.svgGlobe.on("click", () => this.clickCountry(null));
         this.svgGlobe.selectAll(".geocountry")
             .data(features)
             .enter()
-            .insert("path")
+            .append("path")
             .attr("d", this.path)
             .attr("id", (d) => "geocountry" + d.id)
             .attr("class", (d) => this.styleCountry(d))
             .on("mouseover", (d) => this.hoverCountry(d))
+            .on("mouseout", () => this.hoverCountry(null))
             .on("click", (d) => this.clickCountry(d));
     }
 
     async loadPlaces() {
         // load places data
         this.places = await d3.json("/data/places.json");
+        geodata.setPlaces(this.places);
         this.showPlaces();
     }
 
@@ -171,48 +159,50 @@ class GeoWorld {
       }
 
     showPlaces() {
-        var places = this.places.filter(x => x.type == "City" || x.country == this.selectedCountryID);
-
         var circle = d3.geoCircle();
-        this.svgGlobe.selectAll("path.geopoint").remove();
-        this.svgGlobe.selectAll("path.geopoint")
-            .data(places)
+        this.svgGlobe.selectAll(".geoplace").remove();
+        this.svgGlobe.selectAll(".geoplace")
+            .data(this.places)
             .enter()
             .append("path")
             .datum((d) => {
                 return circle
                     .center([d.lng, d.lat])
-                    .radius(d.type.toLowerCase() == "city" ? 0.3 : 0.2)
+                    .radius(0.2)
                     ();
             })
-            .attr("class", (d) => {
-                switch (d.type.toLowerCase()) {
-                    case "city":
-                        return "geopoint geocity";
-                    default:
-                        return "geopoint geoplace";
-                }
-             })
-            .attr("d", this.path);
+            .attr("class", "geoplace")
+            .attr("d", this.path)
+            .on("mouseover", (d) => this.hoverPlace(d));
     }
 
     // ============================================================
     // update svg with data
-    render() {
-        this.svgGlobe.selectAll(".geocountry").attr("d", this.path);
+    refresh() {
+        this.svgGlobe.selectAll("path").attr("d", this.path);
         this.showPlaces();
         this.showFlights();
     }
 
+    moveWorld() {
+       this.svgGlobe.selectAll('path') // To prevent stroke width from scaling
+        .attr('transform', d3.event.transform);
+    }
+
     // drag globe
-    dragMouse = [0, 0];
-    dragPoint = [0, 0];
-    dragGlobe(start) {
+    dragWorld(start) {
+        // prevent dragging while selected
+        if (this.selectedCountryID > 0) {
+            return;
+        }
+
+        // toggle mouse/touch source
         var mouse = [d3.event.sourceEvent.pageX, d3.event.sourceEvent.pageY];
         if (d3.event.sourceEvent.changedTouches != null && d3.event.sourceEvent.changedTouches.length > 0) {
             mouse = [d3.event.sourceEvent.changedTouches[0].pageX, d3.event.sourceEvent.changedTouches[0].pageY];
         }
 
+        // start or continue drag
         if (start) {
             this.dragMouse = mouse;
             this.dragPoint = this.proj.center();
@@ -222,10 +212,7 @@ class GeoWorld {
             var y = mouse[1] - this.dragMouse[1];
             var point = [this.dragPoint[0] + (mouse[0] - this.dragMouse[0]) / 4, this.dragPoint[1] + (this.dragMouse[1] - mouse[1]) / 4];
             this.proj.center([point[0], point[1]]);
-            
-            this.projFlights.center([point[0], point[1]]);
-            
-            this.render();
+            this.refresh();
         }
     }
 
@@ -239,32 +226,69 @@ class GeoWorld {
     // rotate and scale animation
     animate(r, k) { // rotate, scale
         var iT = d3.zoomTransform(this.svgGlobe);
-        if (r != this.proj.center() || k != iT.k)
+        if (r != this.proj.rotate() || k != iT.k)
         {
             d3.transition()
                 .duration(750)
                 .tween("animate", 
                     () => {
                         var iK = d3.interpolate(iT.k, k);
-                        var iR = d3.interpolate(this.proj.center(), r);
+                        var iR = d3.interpolate(this.proj.rotate(), r);
                         return (i) => {
                             iT.k = iK(i);
                             this.svgGlobe.attr("transform", iT);
-                            this.proj.center(iR(i));
-                            this.render();
+                            this.proj.rotate(iR(i));
+                            this.refresh();
                         };
                     });
+                //.on("end", () => this.tourPlaces());
         }
     }
 
     // ============================================================
-    // country selection methods
-    styleCountry(d) {
-        return "geocountry" + (geograffiti.isVisitedCountry(parseInt(d.id)) ? " geovisited" : "");
+    // place methods
+    hoverPlace(d) {
+        if (d && d.id) {
+            var key = d.id.replace("geoplace", "");
+            var place = geodata.getPlace(key);
+            this.onHoverPlace(place);
+        }
+        else {
+            this.onHoverPlace(null);
+        }
     }
 
-    hoverCountry(d) {
-        this.onHoverCountry(d ? geograffiti.getCountry(d.id) : null);
+    clickPlace(d) {
+        if (d3.event) {
+            d3.event.stopPropagation();
+        }
+        if (d && d.id) {
+            var key = d.id.replace("geoplace", "");
+            var place = geodata.getPlace(key);
+            this.selectCountry(place.country);
+            this.onClickPlace(place);
+        }
+        else {
+            this.onClickPlace(null);
+        }
+    }
+
+    onClickPlace(place) {
+        if (this.debug) console.log("onClickPlace", place);
+    }
+
+    onHoverPlace(place) {
+        if (this.debug) console.log("onHoverPlace", place);
+    }
+
+    // ============================================================
+    // country methods
+    styleCountry(d) {
+        return "geocountry" + (geodata.isVisited(parseInt(d.id)) ? " geovisited" : "");
+    }
+
+    hoverCountry(d, over) {
+        this.onHoverCountry(d ? geodata.getCountry(d.id) : null);
     }
 
     clickCountry(d) {
@@ -281,35 +305,39 @@ class GeoWorld {
             // execute event handler
             this.onSelectCountry();
             // reset zoom level
-            this.animate(this.proj.center(), 1);
+            this.animate(this.proj.rotate(), 1);
         }
     }
 
     clearCountry() {
+        this.tourClear();
         if (this.selectedCountryID > 0) {
             d3.select("#geocountry" + this.selectedCountryID).classed("selected", false);
             this.selectedCountryID = 0;
+            this.showPlaces();
         }        
     }
 
     selectCountry(id) {
         // set selection
         if (this.selectedCountryID != id) {
+            console.log("selectCountry", this.dragable);
+
             this.clearCountry();
             this.selectedCountryID = id;
             d3.select("#geocountry" + id).classed("selected", true);
 
             // load country data
-            var c = geograffiti.getCountry(id);
-            this.animate([-c.lng, -c.lat], 2);
-            /*
-            // invert for rotation
-            this.proj.rotate([-c.lng, -c.lat]);
-            // render render            
-            this.render();
-            // zoom in
-            this.zoomTo(2);
-            */
+            var c = geodata.getCountry(id);
+            var dist = d3.geoDistance([c.lngMin, c.latMin], [c.lngMax, c.latMax]);
+            var lng = (c.lngMax + c.lngMin) / 2;
+            var lat = (c.latMax + c.latMin) / 2;
+            var scale = 1.57 / dist;
+            if (scale > 4) {
+                scale = 4;
+            }
+            this.animate([-lng, -lat], scale);
+            //this.animate([-c.lng, -c.lat], 2);
 
             // execute event handler
             this.onSelectCountry(c);
@@ -323,4 +351,5 @@ class GeoWorld {
     onHoverCountry(country) {
         if (this.debug) console.log("onHoverCountry", country);
     }
+
 }
