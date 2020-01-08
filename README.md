@@ -1,6 +1,4 @@
-# TerraTresD3emo
+# KevinAndEarth.com
 
-## 3D Earth Demo in D3
-
-### Initialization
+## 40th Anniversary Edition
 
