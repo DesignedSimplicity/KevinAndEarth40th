@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Kevin & Earth - World Transit</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <link href="https://fonts.googleapis.com/css?family=Amatic+SC" rel="stylesheet">
+    <link href="/styles/core.css" rel="stylesheet">
+    <link href="/scripts/lib/leaflet.css" rel="stylesheet">
+    <script src="/scripts/lib/leaflet.js"></script>
+    <script src="/scripts/lib/leaflet.windy.KML.js"></script>
+</head>
+<body>
+    <a id="head" class="head-link" href="/">Kevin & Earth</a>
+    <div id="world"></div>
+    <script type="text/javascript">
+        // Make basemap
+        const map = new L.Map("world", { center: new L.LatLng(58.4, 43.0), zoom: 3 });
+        const osm = new L.TileLayer("http://a.tile.stamen.com/toner/{z}/{x}/{y}.png");
+        //const osm = new L.TileLayer("http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png");
+
+        map.addLayer(osm);
+
+        // Load kml file
+        fetch("/data/kml/transit.xml")
+            .then(res => res.text())
+            .then(kmltext => {
+                // Create new kml overlay
+                const parser = new DOMParser();
+                const kml = parser.parseFromString(kmltext, "text/xml");
+                const track = new L.KML(kml);
+                map.addLayer(track);
+
+                // Adjust map to show the kml
+                const bounds = track.getBounds();
+                map.fitBounds(bounds);
+            });
+    </script>
+
+</body>
+</html>

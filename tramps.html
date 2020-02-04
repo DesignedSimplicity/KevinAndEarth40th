@@ -13,18 +13,18 @@
     <script src="/scripts/lib/leaflet.windy.KML.js"></script>
 </head>
 <body>
-    <h1 id="head">Kevin & Earth</h1>
-    <div style="width: 100vw; height: 100vh" id="map"></div>
+    <a id="head" class="head-link" href="/">Kevin & Earth</a>
+    <div id="world"></div>
     <script type="text/javascript">
         // Make basemap
-        const map = new L.Map("map", { center: new L.LatLng(58.4, 43.0), zoom: 11 });
+        const map = new L.Map("world", { center: new L.LatLng(58.4, 43.0), zoom: 11 });
         const osm = new L.TileLayer("http://a.tile.stamen.com/toner/{z}/{x}/{y}.png");
         //const osm = new L.TileLayer("http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png");
 
         map.addLayer(osm);
 
         // Load kml file
-        fetch("/data/kml/AotearoaTramping.kml")
+        fetch("/data/kml/tramps.xml")
             .then(res => res.text())
             .then(kmltext => {
                 // Create new kml overlay
