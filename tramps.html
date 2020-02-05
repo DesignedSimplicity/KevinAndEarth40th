@@ -11,6 +11,7 @@
     <link href="/scripts/lib/leaflet.css" rel="stylesheet">
     <script src="/scripts/lib/leaflet.js"></script>
     <script src="/scripts/lib/leaflet.windy.KML.js"></script>
+    <script src="/scripts/lib/leaflet.tile.stamen.js"></script>
 </head>
 <body>
     <a id="head" class="head-link" href="/">Kevin & Earth</a>
@@ -18,10 +19,10 @@
     <script type="text/javascript">
         // Make basemap
         const map = new L.Map("world", { center: new L.LatLng(58.4, 43.0), zoom: 11 });
-        const osm = new L.TileLayer("http://a.tile.stamen.com/toner/{z}/{x}/{y}.png");
-        //const osm = new L.TileLayer("http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png");
+        map.zoomControl.setPosition("bottomleft");
 
-        map.addLayer(osm);
+        const tiles = new L.StamenTileLayer("terrain-background"); //toner-background
+        map.addLayer(tiles);
 
         // Load kml file
         fetch("/data/kml/tramps.xml")

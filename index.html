@@ -9,10 +9,14 @@
     <link href="https://fonts.googleapis.com/css?family=Amatic+SC" rel="stylesheet">
     <link href="/styles/core.css" rel="stylesheet">
     <style>
+        body {
+            overflow: scroll;
+        }
+
         #stars {
             width: 100%;
             height: 100%;
-            position: absolute;
+            position: fixed;
             top: 0;
             left: 0;
             right: 100%;
@@ -33,19 +37,60 @@
             padding: 10px 0;
             margin: 0 auto;
         }
+
+        #menu {
+            text-align: center;            
+            margin: 0 auto;
+        }
+
+        #menu > a {
+            margin: 10px;
+            width: 320px;
+            display: inline-block;
+            opacity: 0.9;
+        }
+
+        #menu > a:hover {
+            opacity: 1;
+        }
+
+        #menu > a > * {
+            color: #fff;
+            font-size: 2rem;
+            padding: 0;
+            margin: 0;
+        }
+
+        #menu > a > img {
+            width: 100%;
+        }
     </style>
 </head>
 
 <body>
-    <h1 id="home">Kevin & Earth</h1>
+    <h1 id="head">Kevin & Earth</h1>
+    <hr />
     <div id="logo">
-        <hr />
+        <img src="/images/40th.png" />
+    </div>
+    <h2 id="intro">40,000 km away, and...<br /><small>right back where I started?!</small></h2>
+    <hr />
+    <div id="menu">
         <a href="/globe.html">
-            <img src="/images/40th.png" />
+            <img src="/images/menu-globe.png" />
+            <h3>GloBall Interative</h3>
         </a>
-        <hr />
-        <h2 id="intro">40,000 km away, and...<br /><small>right back where I started?!</small></h2>
-    </div> <canvas id="stars" width="500" height="400">
+        <a href="/tramps.html">
+            <img src="/images/menu-tramps.png" />
+            <h3>Tramping Aotearoa</h3>
+        </a>
+        <a href="/transit.html">
+            <img src="/images/menu-transit.png" />
+            <h3>Planatary Transits</h3>
+        </a>
+    </div>
+
+    <canvas id="stars" width="500" height="400">
     </canvas>
     <script>
         var maxZ = 64;
