@@ -21,7 +21,7 @@
         const map = new L.Map("world", { center: new L.LatLng(58.4, 43.0), zoom: 3 });
         map.zoomControl.setPosition("bottomleft");
 
-        const tiles = new L.StamenTileLayer("toner-lite");
+        const tiles = new L.StamenTileLayer("toner-background");
         map.addLayer(tiles);
 
         // Load kml file
