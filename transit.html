@@ -10,7 +10,7 @@
     <link href="/scripts/lib/leaflet.css" rel="stylesheet">
     <script src="/scripts/lib/leaflet.js"></script>
     <script src="/scripts/lib/leaflet.windy.KML.js"></script>
-    <script src="/scripts/lib/leaflet.tile.stamen.js"></script>
+    <script src="/scripts/lib/leaflet-providers.js"></script>
 </head>
 <body>
     <a id="head" class="head-link" href="/">Kevin & Earth</a>
@@ -19,9 +19,7 @@
         // Make basemap
         const map = new L.Map("world", { center: new L.LatLng(58.4, 43.0), zoom: 3 });
         map.zoomControl.setPosition("bottomleft");
-
-        const tiles = new L.StamenTileLayer("toner-background");
-        map.addLayer(tiles);
+        L.tileLayer.provider('Stadia.StamenTonerBackground').addTo(map);
 
         // Load kml file
         fetch("/data/kml/transit.xml")
@@ -37,13 +35,6 @@
                 const bounds = track.getBounds();
                 map.fitBounds(bounds);
             });
-    </script>
-    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-132961-13"></script>
-    <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'UA-132961-13');
     </script>
 </body>
 </html>

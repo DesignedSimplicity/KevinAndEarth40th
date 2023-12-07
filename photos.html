@@ -10,7 +10,7 @@
     <link href="/scripts/lib/leaflet.css" rel="stylesheet">
     <script src="/scripts/lib/leaflet.js"></script>
     <script src="/scripts/lib/leaflet.heat.js"></script>
-    <script src="/scripts/lib/leaflet.tile.stamen.js"></script>
+    <script src="/scripts/lib/leaflet-providers.js"></script>
 </head>
 <body>
     <a id="head" class="head-link" href="/">Kevin & Earth</a>
@@ -19,9 +19,7 @@
         // Make basemap
         const map = new L.Map("world", { center: new L.LatLng(58.4, 43.0), zoom: 3 });
         map.zoomControl.setPosition("bottomleft");
-
-        const tiles = new L.StamenTileLayer("toner-lite");
-        map.addLayer(tiles);
+        L.tileLayer.provider('Stadia.StamenTonerLite').addTo(map);
 
         // load photo data
         var heat = L.heatLayer([
@@ -67872,13 +67870,6 @@
 [52.37015573, 4.89694305],
 [52.37015573, 4.89694305],
 ], {minOpacity: 0.2, radius: 25, gradient: {0.2: 'blue', 0.4: 'lime', 0.6: 'yellow', 0.8: 'orange', 1: 'red'}}).addTo(map);
-    </script>
-    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-132961-13"></script>
-    <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'UA-132961-13');
     </script>
 </body>
 </html>
