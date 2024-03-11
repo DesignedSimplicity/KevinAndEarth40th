@@ -26,7 +26,7 @@
         globe.load();
         globe.onHoverCountry = function (country) {
             if (country) {
-                setInfo("<img src='/images/flags/" + country.key + ".svg' />" + "<span>" + country.name + "</span>");
+                setInfo("<img src='/images/flags/" + country.key.toLowerCase() + ".svg' />" + "<span>" + country.name + "</span>");
             } else {
                 setInfo();
             }
