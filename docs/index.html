@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Kevin & Earth - 40th Anniversary Edition</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <link href="https://fonts.googleapis.com/css?family=Amatic+SC" rel="stylesheet">
+    <link href="/styles/core.css" rel="stylesheet">
+    <link rel="shortcut icon" type="image/png" href="/favicon.ico">
+    <style>
+        body {
+            overflow: scroll;
+        }
+
+        #stars {
+            width: 100%;
+            height: 100%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 100%;
+            bottom: 100%;
+            z-index: -1000;
+        }
+
+        #logo {
+            text-align: center;
+            margin: 0 auto;
+        }
+
+        #intro {
+            font-size: 3rem;
+            line-height: 2.5rem;
+            font-weight: normal;
+            text-align: center;
+            padding: 10px 0;
+            margin: 0 auto;
+        }
+
+        #menu {
+            text-align: center;            
+            margin: 0 auto;
+        }
+
+        #menu > a {
+            margin: 10px;
+            width: 320px;
+            display: inline-block;
+            opacity: 0.9;
+        }
+
+        #menu > a:hover {
+            opacity: 1;
+        }
+
+        #menu > a > * {
+            color: #fff;
+            font-size: 2rem;
+            padding: 0;
+            margin: 0;
+        }
+
+        #menu > a > img {
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <h1 id="head">Kevin & Earth</h1>
+    <hr />
+    <div id="logo">
+        <img src="/images/40th.png" />
+    </div>
+    <h2 id="intro">40,000 km away, and...<br /><small>right back where I started?!</small></h2>
+    <hr />
+    <div id="menu">
+        <a href="/globe.html">
+            <img src="/images/menu-globe.png" />
+            <h3>GloBall Interative</h3>
+        </a>
+        <a href="/tramps.html">
+            <img src="/images/menu-tramps.png" />
+            <h3>Tramping Aotearoa</h3>
+        </a>
+        <a href="/photos.html">
+            <img src="/images/menu-photos.png" />
+            <h3>Photography Hotspots</h3>
+        </a>
+        <a href="/transit.html">
+            <img src="/images/menu-transit.png" />
+            <h3>Planatary Navigation</h3>
+        </a>
+    </div>
+
+    <canvas id="stars" width="500" height="400">
+    </canvas>
+    <script>
+        var maxZ = 64;
+        var canvas;
+        var context;
+        var stars = new Array(512);
+        window.onload = function () {
+            canvas = document.getElementById("stars");
+            if (canvas && canvas.getContext) {
+                context = canvas.getContext("2d");
+                initStars();
+                setInterval(loop, 33);
+            }
+        }
+
+        function getRandom(min, max) {
+            return Math.floor(Math.random() * (max - min - 1)) + min;
+        }
+
+        function initStars() {
+            for (var i = 0; i < stars.length; i++) {
+                stars[i] = {
+                    x: getRandom(-25, 25),
+                    y: getRandom(-25, 25),
+                    z: getRandom(1, maxZ)
+                }
+            }
+        }
+
+        function loop() {
+            var halfWidth = canvas.width / 2;
+            var halfHeight = canvas.height / 2;
+
+            context.fillStyle = "rgb(0,0,0)";
+            context.fillRect(0, 0, canvas.width, canvas.height);
+
+            for (var i = 0; i < stars.length; i++) {
+                stars[i].z -= 0.2;
+
+                if (stars[i].z <= 0) {
+                    stars[i].x = getRandom(-25, 25);
+                    stars[i].y = getRandom(-25, 25);
+                    stars[i].z = maxZ;
+                }
+
+                var k = 128.0 / stars[i].z;
+                var px = stars[i].x * k + halfWidth;
+                var py = stars[i].y * k + halfHeight;
+
+                if (px >= 0 && px <= 500 && py >= 0 && py <= 400) {
+                    var size = (1 - stars[i].z / 32.0) * 2;
+                    var shade = parseInt((1 - stars[i].z / 32.0) * 255);
+                    context.fillStyle = "rgb(" + shade + "," + shade + "," + shade + ")";
+                    context.fillRect(px, py, size, size);
+                }
+            }
+        }
+    </script>
+</body>
+</html>

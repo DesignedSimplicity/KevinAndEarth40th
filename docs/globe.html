@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Kevin & Earth - GloBall 3D Earth</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <link href="https://fonts.googleapis.com/css?family=Amatic+SC" rel="stylesheet">
+    <link href="/styles/core.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-geo-projection/2.0.0/d3-geo-projection.min.js" integrity="sha512-0XHoBFBAxq+6lGh8hWKXrTiYnjC5grqGe1d1YH5wghm9gR9fGQEWmLpAvuTLBaNpPp7xSs5SLMG7YRFt5gj+UA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-zoom/1.6.0/d3-zoom.min.js" integrity="sha512-sl9tizfNqww14VlEDPC7mm8FT1bOoMZlXCQtd49CDn2MWvaDcL8f4fNgTutKqLPrrZ2mE4hG7e7ywA1DRea9jg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.16.0/d3.min.js" integrity="sha512-FHsFVKQ/T1KWJDGSbrUhTJyS1ph3eRrxI228ND0EGaEp6v4a/vGwPWd3Dtd/+9cI7ccofZvl/wulICEurHN1pg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js" integrity="sha512-4UKI/XKm3xrvJ6pZS5oTRvIQGIzZFoXR71rRBb1y2N+PbwAsKa5tPl2J6WvbEvwN3TxQCm8hMzsl/pO+82iRlg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="/scripts/geodata.js"></script>
+    <script src="/scripts/geoglobe.js"></script>
+    <link rel="shortcut icon" type="image/png" href="/favicon.ico">
+</head>
+<body>
+    <a id="head" class="head-link" href="/">Kevin & Earth</a>
+    <div id="info"></div>
+    <div id="globe">
+    </div>
+    <script>
+        var globe = new GeoGlobe();
+        globe.init();
+        globe.load();
+        globe.onHoverCountry = function (country) {
+            if (country) {
+                setInfo("<img src='/images/flags/" + country.key + ".svg' />" + "<span>" + country.name + "</span>");
+            } else {
+                setInfo();
+            }
+        }
+        function setInfo(text, icon) {
+            if (text) {
+                document.getElementById("info").innerHTML = text;
+            } else {
+                document.getElementById("info").innerHTML = " ";
+            }
+        }
+    </script>
+</body>
+</html>
