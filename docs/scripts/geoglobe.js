@@ -158,7 +158,7 @@ class GeoGlobe {
                     .data(data)
                     .enter()
                     .append("svg:image")
-                    .attr("xlink:href", function (d) { return "/images/places/" + d.t + ".svg"; })
+                    .attr("xlink:href", function (d) { return "/images/places/" + d.t.toLowerCase() + ".svg"; })
                     .attr("class", "geoicon")
                     .attr("width", scaleSize)
                     .attr("height", scaleSize)
